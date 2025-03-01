@@ -18,6 +18,14 @@ namespace Algos
       InitializeComponent();
       ConfigureSettings();
     }
+    private Item? _inEditItem = null;
+    private Item? _copiedItem = null;
+    private bool _InReorder = false;
+    private bool _InReset = false;
+    private bool _InEdit = false;
+    private bool _isModelActive = false;
+    private string _ModelFileName = "";
+    private ItemService _itemService;
 
     #region Configure Settings File and Dictionary
     private SettingsFile _settingsFile;
@@ -56,7 +64,7 @@ namespace Algos
     private void Form1_Shown(object sender, EventArgs e) {
       SetLocationSettings();
       ModelActive = false;
-      SetupComboBox();
+      SetupModelFileNamePicker();
       this.Invoke((Action)(async () => {
         await wbOut.EnsureCoreWebView2Async().ConfigureAwait(false);
       }));
@@ -127,7 +135,7 @@ namespace Algos
       }
       SaveSettings();
     }
-    private void SetupComboBox() {
+    private void SetupModelFileNamePicker() {
       _settings = _settingsFile.Settings;
       if (_settings.ContainsKey("MRUL")) {
         string MRUL = _settings["MRUL"].Value;
@@ -154,52 +162,7 @@ namespace Algos
     }
     #endregion
 
-    #region Form File ModelActive  
-
-    private bool _isModelActive = false;
-    private string _ModelFileName = "";
-    private ItemService _itemService;
-    public bool ModelActive {
-      get { return _isModelActive; }
-      set {
-        _isModelActive = value;
-        if (_isModelActive) {
-          try {
-            _itemService = new ItemService(treeView1, this, _itemTypeService, _ModelFileName);
-            _itemService.LoadTreeviewItems(treeView1);
-            AddFileToMRUL(_ModelFileName);
-            SaveSettings();
-          } catch (Exception ex) {
-            MessageBox.Show("Error loading model: " + ex.Message);
-            _isModelActive = false;
-            return;
-          }
-          this.Text = "Algos - " + _ModelFileName;
-          if (btnBrowse.Visible) btnBrowse.Visible = false;
-          if (comboBox1.Visible) comboBox1.Visible = false;
-          if (!cbShape.Enabled) cbShape.Enabled = true;
-          btnOpen.Text = "Close";
-          lbFocusedItem.Text = "";
-          btnOpen.ImageIndex = 1;
-
-        } else {
-          this.Text = "Algos - Choose file and click open to continue.";
-          if (!btnBrowse.Visible) btnBrowse.Visible = true;
-          if (!comboBox1.Visible) comboBox1.Visible = true;
-          btnOpen.Text = "Open";
-          _ModelFileName = "";
-          lbFocusedItem.Text = "File To Open";
-          treeView1.Nodes.Clear();
-          _inEditItem = null;
-          btnOpen.ImageIndex = 0;
-          if (btnSave.Visible) btnSave.Visible = false;
-          if (btnCancel.Visible) btnCancel.Visible = false;
-          if (cbShape.Enabled) cbShape.Enabled = false;
-          if (cbEdit2.Enabled) cbEdit2.Enabled = false;
-        }
-      }
-    }
-
+    #region Open the model
     private void btnBrowse_Click(object sender, EventArgs e) {
       if (_ModelFileName.Length > 0) {
         odMain.InitialDirectory = Path.GetDirectoryName(_ModelFileName);
@@ -210,7 +173,7 @@ namespace Algos
       DialogResult dialogResult = odMain.ShowDialog();
       if (dialogResult == DialogResult.OK) {
         _ModelFileName = odMain.FileName;
-        ModelActive = true;        
+        ModelActive = true;
       }
     }
 
@@ -234,11 +197,46 @@ namespace Algos
 
     #endregion
 
-    private Item? _inEditItem = null;
-    private Item? _copiedItem = null;
-    private bool _InReorder = false;
-    private bool _InReset = false;
-    private bool _InEdit = false;
+    #region ModelActive and InEdit  
+
+    public bool ModelActive {
+      get { return _isModelActive; }
+      set {
+        _isModelActive = value;
+        if (_isModelActive) {
+          try {
+            _itemService = new ItemService(treeView1, this, _itemTypeService, _ModelFileName);
+            _itemService.LoadTreeviewItems(treeView1);
+            AddFileToMRUL(_ModelFileName);
+            SaveSettings();
+          } catch (Exception ex) {
+            MessageBox.Show("Error loading model: " + ex.Message);
+            _isModelActive = false;
+            return;
+          }
+          this.Text = "Algos - " + _ModelFileName;
+          btnOpen.Text = "Close";
+          lbFocusedItem.Text = "";
+          btnOpen.ImageIndex = 1;
+
+        } else {
+          this.Text = "Algos - Choose file and click open to continue.";
+          if (!btnBrowse.Visible) btnBrowse.Visible = true;
+          if (!comboBox1.Visible) comboBox1.Visible = true;
+          btnOpen.Text = "Open";
+          _ModelFileName = "";
+          lbFocusedItem.Text = "File To Open";
+          treeView1.Nodes.Clear();
+          _inEditItem = null;
+          ResetPropertyEditors();
+          btnOpen.ImageIndex = 0;
+          if (btnSave.Visible) btnSave.Visible = false;
+          if (btnCancel.Visible) btnCancel.Visible = false;
+
+        }
+      }
+    }
+
     public bool InEdit {
       get { return _InEdit; }
       set {
@@ -249,17 +247,25 @@ namespace Algos
           if (edName.BackColor != Color.LightYellow) edName.BackColor = Color.LightYellow;
           if (cbShape.BackColor != Color.LightYellow) cbShape.BackColor = Color.LightYellow;
           if (cbEdit2.BackColor != Color.LightYellow) cbEdit2.BackColor = Color.LightYellow;
+          if (cbEdit3.BackColor != Color.LightYellow) cbEdit3.BackColor = Color.LightYellow;
+        //  if (cbExpandedShape.BackColor != Color.LightYellow) cbExpandedShape.BackColor = Color.LightYellow;
+          if (edLine2.BackColor != Color.LightYellow) edLine2.BackColor = Color.LightYellow;
         } else {
           if (btnSave.Visible) btnSave.Visible = false;
           if (btnCancel.Visible) btnCancel.Visible = false;
           if (edName.BackColor != Color.White) edName.BackColor = Color.White;
           if (cbShape.BackColor != Color.White) cbShape.BackColor = Color.White;
           if (cbEdit2.BackColor != Color.White) cbEdit2.BackColor = Color.White;
+          if (cbEdit3.BackColor != Color.White) cbEdit3.BackColor = Color.White;
+         // if (cbExpandedShape.BackColor != Color.White) cbExpandedShape.BackColor = Color.White;
+          if (edLine2.BackColor != Color.White) edLine2.BackColor = Color.White;
         }
       }
     }
 
-    #region Form Menu Items
+    #endregion
+
+    #region Treeview Context Menus 
     private void contextMenuStrip1_Opening(object sender, System.ComponentModel.CancelEventArgs e) {
       if (_inEditItem == null) {
         addFlowchartNodeMenuItem.Visible = false;
@@ -267,7 +273,7 @@ namespace Algos
         addMindMapNodeMenuItem.Visible = false;
         removeSelectedItemToolStripMenuItem.Visible = false;
         LocalCopyMenuItem.Visible = false;
-      } else {       
+      } else {
         var diagramNode = _itemService.GetDiagramNode(_inEditItem);
         if (diagramNode.ItemTypeId == _types.MindMapDiagram.Id) {
           addFlowchartNodeMenuItem.Visible = false;
@@ -286,7 +292,7 @@ namespace Algos
             addFlowchartNodeMenuItem.Visible = false;
             addFlowchartLinkMenuItem.Visible = false;
             addMindMapNodeMenuItem.Visible = false;
-          }          
+          }
         } else {
           addFlowchartNodeMenuItem.Visible = false;
           addFlowchartLinkMenuItem.Visible = false;
@@ -294,12 +300,12 @@ namespace Algos
         }
         removeSelectedItemToolStripMenuItem.Visible = true;
         LocalCopyMenuItem.Visible = true;
-      }      
+      }
       if (_copiedItem == null || _inEditItem == null) {
         LocalPasteMenuItem.Visible = false;
       } else {
         var copiedDiagram = _itemService.GetDiagramNode(_copiedItem);
-        var targetDiagram = _itemService.GetDiagramNode(_inEditItem);        
+        var targetDiagram = _itemService.GetDiagramNode(_inEditItem);
         LocalPasteMenuItem.Visible = (copiedDiagram?.ItemTypeId == targetDiagram?.ItemTypeId) &&
           _inEditItem.ItemTypeId != _types.FlowChartLink.Id;
       }
@@ -374,7 +380,7 @@ namespace Algos
         } catch (Exception ex) {
           LogMsg($"Error pasting item: {ex.Message}");
           MessageBox.Show($"Error pasting item: {ex.Message}");
-        }        
+        }
       }
     }
 
@@ -391,7 +397,7 @@ namespace Algos
     }
     #endregion
 
-    #region TreeView Methods 
+    #region TreeView After Select Events Handlers 
     private void treeView1_AfterSelect(object sender, TreeViewEventArgs e) {
       if (!_InReorder) {
         if (e.Node == null) return;
@@ -414,16 +420,19 @@ namespace Algos
           e.CancelEdit = true;
           return;
         }
-        if (_inEditItem.Name != e.Label) { _inEditItem.Name = e.Label; }
-        if (_inEditItem.Dirty) _itemService.UpdateItem(_inEditItem);
-        ResetPropertyEditors();
-        PopulateDisplays();
-
+        if (_inEditItem.Name != e.Label) {
+          _inEditItem.Name = e.Label;
+          ResetPropertyEditors();
+          InEdit = true;
+        }
       } catch (Exception ex) {
         LogMsg(ex.Message);
       }
 
     }
+
+    #region Drag and Drop Handlers
+
     private void treeView1_ItemDrag(object sender, ItemDragEventArgs e) {
       if (e.Button == MouseButtons.Left && e.Item != null) {
         DoDragDrop(e.Item, DragDropEffects.Move);
@@ -466,18 +475,18 @@ namespace Algos
 
                 if (!targetNode.IsExpanded) targetNode.Expand();
                 if (targetNode.ItemTypeId == _types.MindMapDiagram.Id) {
-                  e.Effect = DragDropEffects.Move;                  
+                  e.Effect = DragDropEffects.Move;
                 } else if (targetNode.ItemTypeId == _types.FlowChartDiagram.Id && selectedItem.ItemTypeId == _types.FlowChartNode.Id) {
-                  e.Effect = DragDropEffects.Move;                  
+                  e.Effect = DragDropEffects.Move;
                 } else if (targetNode.ItemTypeId == _types.FlowChartNode.Id &&
-                  ( selectedItem.ItemTypeId == _types.FlowChartNode.Id || selectedItem.ItemTypeId == _types.FlowChartLink.Id)) {
-                  e.Effect = DragDropEffects.Move;                  
+                  (selectedItem.ItemTypeId == _types.FlowChartNode.Id || selectedItem.ItemTypeId == _types.FlowChartLink.Id)) {
+                  e.Effect = DragDropEffects.Move;
                 } else if (targetNode.ItemTypeId == _types.FlowChartLink.Id) {
-                  e.Effect = DragDropEffects.None;                  
+                  e.Effect = DragDropEffects.None;
                 } else {
                   e.Effect = DragDropEffects.None;
-                }                
-                
+                }
+
               } else {
                 e.Effect = DragDropEffects.None;
               }
@@ -492,8 +501,138 @@ namespace Algos
     }
 
     #endregion
+    #endregion
 
-    #region Configure Property Editors
+    #region Editors and change handlers
+
+    private void EnsureEditorVisibility() {
+      if (_inEditItem != null) {
+        var diagramNode = _itemService.GetDiagramNode(_inEditItem);
+        if (!lbTech.Visible) lbTech.Visible = true;
+        if (!label1.Visible) label1.Visible = true;
+        if (!edName.Visible) edName.Visible = true;
+
+        if (diagramNode.ItemTypeId == _types.MindMapDiagram.Id) {
+
+          if (cbExpandedShape.Visible) cbExpandedShape.Visible = false;
+          if (!cbShape.Visible) cbShape.Visible = true;
+          if (!lbShape.Visible) lbShape.Visible = true;
+          if (cbEdit2.Visible) cbEdit2.Visible = false;
+          if (lbEdit2.Visible) lbEdit2.Visible = false;
+          if (cbEdit3.Visible) cbEdit3.Visible = false;
+          if (lbEdit3.Visible) lbEdit3.Visible = false;
+
+        } else if (diagramNode.ItemTypeId == _types.FlowChartDiagram.Id) {
+
+          if (!cbShape.Visible) cbShape.Visible = true;
+          if (!lbShape.Visible) lbShape.Visible = true;
+          if (_inEditItem.ItemTypeId == _types.FlowChartDiagram.Id) {
+            if (cbExpandedShape.Visible) cbExpandedShape.Visible = false;
+            if (cbEdit2.Visible) cbEdit2.Visible = false;
+            if (lbEdit2.Visible) lbEdit2.Visible = false;
+            if (cbEdit3.Visible) cbEdit3.Visible = false;
+            if (lbEdit3.Visible) lbEdit3.Visible = false;
+            if (!lbLine2.Visible) lbLine2.Visible = true;
+            if (!edLine2.Visible) edLine2.Visible = true;
+          } else if (_inEditItem.ItemTypeId == _types.FlowChartNode.Id) {
+            if (!cbExpandedShape.Visible) cbExpandedShape.Visible = true;
+            if (cbEdit2.Visible) cbEdit2.Visible = false;
+            if (lbEdit2.Visible) lbEdit2.Visible = false;
+            if (cbEdit3.Visible) cbEdit3.Visible = false;
+            if (lbEdit3.Visible) lbEdit3.Visible = false;
+            if (lbLine2.Visible) lbLine2.Visible = false;
+            if (edLine2.Visible) edLine2.Visible = false;
+          } else if (_inEditItem.ItemTypeId == _types.FlowChartLink.Id) {
+            if (!cbExpandedShape.Visible) cbExpandedShape.Visible = true;
+            if (!cbEdit2.Visible) cbEdit2.Visible = true;
+            if (!lbEdit2.Visible) lbEdit2.Visible = true;
+            if (!cbEdit3.Visible) cbEdit3.Visible = true;
+            if (!lbEdit3.Visible) lbEdit3.Visible = true;
+            if (lbLine2.Visible) lbLine2.Visible = false;
+            if (edLine2.Visible) edLine2.Visible = false;
+          }
+        }
+      } else {
+        if (label1.Visible) label1.Visible = false;
+        if (cbShape.Visible) cbShape.Visible = false;
+        if (cbExpandedShape.Visible) cbExpandedShape.Visible = false;
+        if (cbEdit2.Visible) cbEdit2.Visible = false;
+        if (lbShape.Visible) lbShape.Visible = false;
+        if (lbEdit2.Visible) lbEdit2.Visible = false;
+        if (lbTech.Visible) lbTech.Visible = false;
+        if (edName.Visible) edName.Visible = false;
+        if (cbEdit3.Visible) cbEdit3.Visible = false;
+        if (lbEdit3.Visible) lbEdit3.Visible = false;
+        if (lbLine2.Visible) lbLine2.Visible = false;
+        if (edLine2.Visible) edLine2.Visible = false;
+      }
+    }
+    private void ResetPropertyEditors() {
+      EnsureEditorVisibility();
+      if (_inEditItem != null) {
+        _InReset = true;
+        try {
+
+          lbFocusedItem.Text = _inEditItem.Name;
+          edName.Text = _inEditItem.Name;
+          var editStr = _InEdit ? "Edit" : "View";
+          lbTech.Text = $"{editStr} Id {_inEditItem.Id};";
+
+          var diagramNode = _itemService.GetDiagramNode(_inEditItem);
+          if (diagramNode.ItemTypeId == _types.MindMapDiagram.Id) {
+            lbShape.Text = "Shape";
+            ConfigureComboBoxTypes(cbShape, _inEditItem.ShapeId, _types.GetChildrenItemsNoDef(_types.MindMapShapes.Id));
+          } else if (diagramNode.ItemTypeId == _types.FlowChartDiagram.Id) {
+
+            if (_inEditItem.ItemTypeId == _types.FlowChartDiagram.Id) {
+              lbShape.Text = "Align:";
+              edLine2.Text = _inEditItem.Title;
+              ConfigureComboBoxTypes(cbShape, _inEditItem.OrientationId, _types.GetChildrenItemsNoDef(_types.FlowChartOrientation.Id));
+            } else if (_inEditItem.ItemTypeId == _types.FlowChartNode.Id) {
+
+              cbExpandedShape.Text = "Use Expanded Shapes";
+              if (!cbExpandedShape.Visible) cbExpandedShape.Visible = true;
+              if (cbExpandedShape.Checked != _inEditItem.IsExpandedShape) {
+                cbExpandedShape.Checked = _inEditItem.IsExpandedShape;
+              }
+
+              lbShape.Text = "Shape";
+              if (cbExpandedShape.Checked) {
+                ConfigureComboBoxTypes(cbShape, _inEditItem.ShapeId, _types.GetChildrenItemsNoDef(_types.FlowChartExtShape.Id));
+              } else {
+                ConfigureComboBoxTypes(cbShape, _inEditItem.ShapeId, _types.GetChildrenItemsNoDef(_types.FlowChartShapes.Id));
+              }
+
+            } else if (_inEditItem.ItemTypeId == _types.FlowChartLink.Id) {
+
+              if (!cbExpandedShape.Visible) cbExpandedShape.Visible = true;
+              cbExpandedShape.Text = "Link Multi Directional";
+              if (cbExpandedShape.Checked != _inEditItem.IsLinkMultidirectional) {
+                cbExpandedShape.Checked = _inEditItem.IsLinkMultidirectional;
+              }
+
+              lbShape.Text = "Link To";
+              ConfigureComboBoxItems(cbShape, _inEditItem.OrientationId, _itemService.GetFlowchartNodes(diagramNode));
+
+              lbEdit2.Text = "Line Style";
+              ConfigureComboBoxTypes(cbEdit2, _inEditItem.LinkLineStyleId, _types.GetChildrenItemsNoDef(_types.FlowChartLinkLineStyle.Id));
+
+              lbEdit3.Text = "Link Ends";
+              ConfigureComboBoxTypes(cbEdit3, _inEditItem.LinkEndingId, _types.GetChildrenItemsNoDef(_types.FlowChartLinkEnding.Id));
+            }
+
+
+          }
+
+
+        } catch (Exception ex) {
+          LogMsg(ex.Message);
+        } finally {
+          _InReset = false;
+        }
+        InEdit = false;
+      }
+    }
 
     public void ConfigureComboBoxItems(ComboBox cb, int SelectedIndex, IEnumerable<Item> nodes) {
       cb.DataSource = nodes;
@@ -529,85 +668,18 @@ namespace Algos
       }
     }
 
-    private void ResetPropertyEditors() {
-      if (_inEditItem != null) {
-        _InReset = true;
-        try {
-
-          lbFocusedItem.Text = _inEditItem.Name;
-          edName.Text = _inEditItem.Name;
-          var editStr = _InEdit ? "Edit" : "View";
-          lbTech.Text =  $"{editStr} Id {_inEditItem.Id};"; 
-
-          var diagramNode = _itemService.GetDiagramNode(_inEditItem);
-          if (diagramNode.ItemTypeId == _types.MindMapDiagram.Id) {
-
-            if (cbExpandedShape.Visible) cbExpandedShape.Visible = false;
-            if (lbEdit2.Visible) lbEdit2.Visible = false;
-            if (cbEdit2.Visible) cbEdit2.Visible = false;
-            lbShape.Text = "Shape";
-            ConfigureComboBoxTypes(cbShape, _inEditItem.ShapeId, _types.GetChildrenItemsNoDef(_types.MindMapShapes.Id));
-
-          } else if (diagramNode.ItemTypeId == _types.FlowChartDiagram.Id) {
-
-            if (_inEditItem.ItemTypeId == _types.FlowChartDiagram.Id) {
-
-              if (cbExpandedShape.Visible) cbExpandedShape.Visible = false;
-              if (cbEdit2.Visible) cbEdit2.Visible = false;
-
-              lbShape.Text = "Align:";
-              ConfigureComboBoxTypes(cbShape, _inEditItem.OrientationId, _types.GetChildrenItemsNoDef(_types.FlowChartOrientation.Id));
-
-            } else if (_inEditItem.ItemTypeId == _types.FlowChartNode.Id) {
-
-              if (cbEdit2.Visible) cbEdit2.Visible = false;
-              if (lbEdit2.Visible) lbEdit2.Visible = false;
-              cbExpandedShape.Text = "Use Expanded Shapes";
-              if (!cbExpandedShape.Visible) cbExpandedShape.Visible = true;
-              if (cbExpandedShape.Checked != _inEditItem.IsExpandedShape) {
-                cbExpandedShape.Checked = _inEditItem.IsExpandedShape;
-              }
-
-              lbShape.Text = "Shape";
-              if (cbExpandedShape.Checked) {
-                ConfigureComboBoxTypes(cbShape, _inEditItem.ShapeId, _types.GetChildrenItemsNoDef(_types.FlowChartExtShape.Id));
-              } else {
-                ConfigureComboBoxTypes(cbShape, _inEditItem.ShapeId, _types.GetChildrenItemsNoDef(_types.FlowChartShapes.Id));
-              }
-
-            } else if (_inEditItem.ItemTypeId == _types.FlowChartLink.Id) {
-
-              if (!cbExpandedShape.Visible) cbExpandedShape.Visible = true;
-              cbExpandedShape.Text = "Link Multi Directional";
-              if (cbExpandedShape.Checked != _inEditItem.IsLinkMultidirectional) {
-                cbExpandedShape.Checked = _inEditItem.IsLinkMultidirectional;
-              }
-
-              lbShape.Text = "Link To";
-              ConfigureComboBoxItems(cbShape, _inEditItem.OrientationId, _itemService.GetFlowchartNodes(diagramNode));
-
-              if (!cbEdit2.Visible) cbEdit2.Visible = true;
-              if (!cbEdit2.Enabled) cbEdit2.Enabled = true;
-              lbEdit2.Text = "Line Style";
-              ConfigureComboBoxTypes(cbEdit2, _inEditItem.LinkLineStyleId, _types.GetChildrenItemsNoDef(_types.FlowChartLinkLineStyle.Id));
-
-
-            }
-          }
-
-
-        } catch (Exception ex) {
-          LogMsg(ex.Message);
-        } finally {
-          _InReset = false;
-        }
-        InEdit = false;
-      }
-    }
 
     private void edName_TextChanged(object sender, EventArgs e) {
       if (!_InReset && _inEditItem != null && edName.Text.Length > 0) {
         if (_inEditItem.Name != edName.Text) {
+          InEdit = true;
+        }
+      }
+    }
+
+    private void edLine2_TextChanged(object sender, EventArgs e) {
+      if (!_InReset && _inEditItem != null && edLine2.Text.Length > 0) {
+        if (_inEditItem.Title != edLine2.Text) {
           InEdit = true;
         }
       }
@@ -665,6 +737,18 @@ namespace Algos
       }
     }
 
+    private void cbEdit3_SelectedIndexChanged(object sender, EventArgs e) {
+      if (!_InReset && _inEditItem != null) {
+        var diagramNode = _itemService.GetDiagramNode(_inEditItem);
+        if (diagramNode.ItemTypeId == _types.FlowChartDiagram.Id) {
+          if (_inEditItem.ItemTypeId == _types.FlowChartLink.Id) {
+            if (cbEdit3.SelectedValue != null && _inEditItem.LinkEndingId != cbEdit3.SelectedValue.AsInt32()) {
+              InEdit = true;
+            }
+          }
+        }
+      }
+    }
 
     private void btnCancel_Click(object sender, EventArgs e) {
       ResetPropertyEditors();
@@ -687,6 +771,7 @@ namespace Algos
           if (_inEditItem.ItemTypeId == _types.FlowChartDiagram.Id) {
             if (cbShape.SelectedValue != null && _inEditItem.OrientationId != cbShape.SelectedValue.AsInt32()) {
               _inEditItem.OrientationId = cbShape.SelectedValue.AsInt32();
+              _inEditItem.Title = edLine2.Text;
             }
           } else if (_inEditItem.ItemTypeId == _types.FlowChartNode.Id) {
             _inEditItem.IsExpandedShape = cbExpandedShape.Checked;
@@ -700,7 +785,11 @@ namespace Algos
             if (cbEdit2.SelectedValue != null && _inEditItem.LinkLineStyleId != cbEdit2.SelectedValue.AsInt32()) {
               _inEditItem.LinkLineStyleId = cbEdit2.SelectedValue.AsInt32();
             }
+            if (cbEdit3.SelectedValue != null && _inEditItem.LinkEndingId != cbEdit3.SelectedValue.AsInt32()) {
+              _inEditItem.LinkEndingId = cbEdit3.SelectedValue.AsInt32();
+            }
             _inEditItem.IsLinkMultidirectional = cbExpandedShape.Checked;
+
           }
 
         }
@@ -711,7 +800,7 @@ namespace Algos
       }
     }
 
-    #endregion
+    #endregion       
 
     #region Mermaid Diagram code generation and display
     private void PopulateDisplays() {
@@ -886,6 +975,8 @@ namespace Algos
       return sb.ToString();
     }
     #endregion
+
+
 
   }
 }

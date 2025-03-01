@@ -53,6 +53,10 @@
       toolStripSeparator3 = new ToolStripSeparator();
       removeSelectedItemToolStripMenuItem = new ToolStripMenuItem();
       imageList2 = new ImageList(components);
+      lbLine2 = new Label();
+      edLine2 = new TextBox();
+      lbEdit3 = new Label();
+      cbEdit3 = new ComboBox();
       lbTech = new Label();
       lbEdit2 = new Label();
       cbEdit2 = new ComboBox();
@@ -182,6 +186,9 @@
       // 
       // splitContainer2.Panel2
       // 
+      splitContainer2.Panel2.Controls.Add(lbLine2);
+      splitContainer2.Panel2.Controls.Add(lbEdit3);
+      splitContainer2.Panel2.Controls.Add(cbEdit3);
       splitContainer2.Panel2.Controls.Add(lbTech);
       splitContainer2.Panel2.Controls.Add(lbEdit2);
       splitContainer2.Panel2.Controls.Add(cbEdit2);
@@ -192,6 +199,7 @@
       splitContainer2.Panel2.Controls.Add(btnSave);
       splitContainer2.Panel2.Controls.Add(label1);
       splitContainer2.Panel2.Controls.Add(edName);
+      splitContainer2.Panel2.Controls.Add(edLine2);
       splitContainer2.Size = new Size(364, 826);
       splitContainer2.SplitterDistance = 494;
       splitContainer2.TabIndex = 0;
@@ -319,6 +327,43 @@
       imageList2.Images.SetKeyName(2, "Fatcow-Farm-Fresh-Borders-accent.32.png");
       imageList2.Images.SetKeyName(3, "separator-label-icon.png");
       // 
+      // lbLine2
+      // 
+      lbLine2.AutoSize = true;
+      lbLine2.Location = new Point(24, 70);
+      lbLine2.Name = "lbLine2";
+      lbLine2.Size = new Size(41, 20);
+      lbLine2.TabIndex = 13;
+      lbLine2.Text = "Title:";
+      // 
+      // edLine2
+      // 
+      edLine2.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+      edLine2.Location = new Point(83, 67);
+      edLine2.Name = "edLine2";
+      edLine2.Size = new Size(270, 27);
+      edLine2.TabIndex = 12;
+      edLine2.TextChanged += edLine2_TextChanged;
+      // 
+      // lbEdit3
+      // 
+      lbEdit3.AutoSize = true;
+      lbEdit3.Location = new Point(12, 171);
+      lbEdit3.Name = "lbEdit3";
+      lbEdit3.Size = new Size(50, 20);
+      lbEdit3.TabIndex = 11;
+      lbEdit3.Text = "label2";
+      // 
+      // cbEdit3
+      // 
+      cbEdit3.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+      cbEdit3.FormattingEnabled = true;
+      cbEdit3.Location = new Point(84, 167);
+      cbEdit3.Name = "cbEdit3";
+      cbEdit3.Size = new Size(270, 28);
+      cbEdit3.TabIndex = 10;
+      cbEdit3.SelectedIndexChanged += cbEdit3_SelectedIndexChanged;
+      // 
       // lbTech
       // 
       lbTech.AutoSize = true;
@@ -331,17 +376,17 @@
       // lbEdit2
       // 
       lbEdit2.AutoSize = true;
-      lbEdit2.Location = new Point(12, 123);
+      lbEdit2.Location = new Point(9, 135);
       lbEdit2.Name = "lbEdit2";
-      lbEdit2.Size = new Size(50, 20);
+      lbEdit2.Size = new Size(56, 20);
       lbEdit2.TabIndex = 8;
-      lbEdit2.Text = "label2";
+      lbEdit2.Text = "lbEdit2";
       // 
       // cbEdit2
       // 
       cbEdit2.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
       cbEdit2.FormattingEnabled = true;
-      cbEdit2.Location = new Point(83, 123);
+      cbEdit2.Location = new Point(83, 133);
       cbEdit2.Name = "cbEdit2";
       cbEdit2.Size = new Size(270, 28);
       cbEdit2.TabIndex = 7;
@@ -350,7 +395,7 @@
       // cbExpandedShape
       // 
       cbExpandedShape.AutoSize = true;
-      cbExpandedShape.Location = new Point(83, 65);
+      cbExpandedShape.Location = new Point(84, 69);
       cbExpandedShape.Name = "cbExpandedShape";
       cbExpandedShape.Size = new Size(176, 24);
       cbExpandedShape.TabIndex = 6;
@@ -361,7 +406,7 @@
       // lbShape
       // 
       lbShape.AutoSize = true;
-      lbShape.Location = new Point(10, 93);
+      lbShape.Location = new Point(10, 103);
       lbShape.Name = "lbShape";
       lbShape.Size = new Size(55, 20);
       lbShape.TabIndex = 5;
@@ -371,7 +416,7 @@
       // 
       cbShape.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
       cbShape.FormattingEnabled = true;
-      cbShape.Location = new Point(83, 89);
+      cbShape.Location = new Point(83, 99);
       cbShape.Name = "cbShape";
       cbShape.Size = new Size(270, 28);
       cbShape.TabIndex = 4;
@@ -409,7 +454,7 @@
       // label1
       // 
       label1.AutoSize = true;
-      label1.Location = new Point(10, 39);
+      label1.Location = new Point(13, 40);
       label1.Name = "label1";
       label1.Size = new Size(52, 20);
       label1.TabIndex = 1;
@@ -522,5 +567,9 @@
     private ToolStripMenuItem LocalPasteMenuItem;
     private ToolStripSeparator toolStripSeparator3;
     private Label lbTech;
+    private ComboBox cbEdit3;
+    private Label lbEdit3;
+    private TextBox edLine2;
+    private Label lbLine2;
   }
 }
