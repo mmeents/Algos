@@ -20,13 +20,15 @@ namespace Algos.Core.Models
     }
 
     public ItemType DiagramGroup { get; set; }
+    #region MindMap Diagram Types
     public ItemType MindMapDiagram { get; set; }
 
     public ItemType MindMapNodes { get; set; }
+        
     public ItemType MindMapShapes { get; set; }
     public ItemType MindMapShapeDef { get; set; }
-
-
+    #endregion
+    #region FlowChart Diagram Types
     public ItemType FlowChartDiagram { get; set; }
     public ItemType FlowChartNode { get; set; }
     public ItemType FlowChartSubGraph { get; set; }
@@ -37,7 +39,11 @@ namespace Algos.Core.Models
     public ItemType FlowChartOrientation { get; set; }
     public ItemType FlowChartLinkEnding { get; set;}
     public ItemType FlowChartLinkLineStyle { get; set; }
-
+    #endregion
+    #region Class Diagram Types
+    
+  
+    #endregion
 
 
     public void Load() {
@@ -224,9 +230,12 @@ namespace Algos.Core.Models
 
       #endregion
       #endregion
+      #region Class Diagram Types
 
+      #endregion
     }
 
+    #region Load helper methods 
     public ItemType AddRootType(string name, string desc) {
       ItemType type = new ItemType() { Name = name, Desc = desc };
       if (type.Id == 0) {
@@ -265,6 +274,7 @@ namespace Algos.Core.Models
       base[type.Id] = type;
       return type;
     }
+    #endregion
 
     #region Dictionary Methods
     public virtual Boolean Contains(int id) {
@@ -287,6 +297,8 @@ namespace Algos.Core.Models
     }
     public virtual void Remove(int id) { if (Contains(id)) { _ = base.TryRemove(id, out _); } }
     #endregion
+
+    #region Get Methods
     public IEnumerable<ItemType> GetChildrenItemsNoDef(int id) {
       var result = this.Select(x => x.Value).Where(x => x.OwnerId == id).OrderBy(x => x.TypeRank);
       return result.ToList();
@@ -303,12 +315,9 @@ namespace Algos.Core.Models
         return null;
       }
     }
+    #endregion
 
-
-
-    
-
-    #region Dialog Types HashSets 
+    #region Types HashSets DiagramTypes 
     private HashSet<int> _diagramTypes;
     private HashSet<int> GetDiagramTypes() {
       HashSet<int> result = new();
@@ -326,7 +335,6 @@ namespace Algos.Core.Models
       }
     }
     #endregion
-
 
   }
 }

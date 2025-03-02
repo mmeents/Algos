@@ -62,7 +62,7 @@ namespace Algos.Core
       }      
     }
 
-    public Item? GetDiagramNode(Item it) {
+    public Item? GetDiagramNode(Item? it) {
       if (it == null) return null;
       var diagramNodes = _types.DiagramTypes;
       if (diagramNodes.Contains(it.ItemTypeId)) {
