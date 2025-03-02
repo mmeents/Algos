@@ -432,7 +432,10 @@ namespace Algos
     }
     private void treeView1_AfterLabelEdit(object sender, NodeLabelEditEventArgs e) {
       try {
-
+        if (e.Node == null) {
+          e.CancelEdit = true;
+          return;
+        }
         if (_inEditItem != (Item)e.Node) {
           _inEditItem = (Item)e.Node;
         }
@@ -606,25 +609,26 @@ namespace Algos
 
           var diagramNode = _itemService.GetDiagramNode(_inEditItem);
           if (diagramNode.ItemTypeId == _types.MindMapDiagram.Id) {
-            lbShape.Text = "Shape";
+            lbShape.Text = "Shape:";
             int shapeId = _inEditItem.ShapeId;
             ConfigureComboBoxTypes(cbShape, shapeId, _types.GetChildrenItemsNoDef(_types.MindMapShapes.Id));
           } else if (diagramNode.ItemTypeId == _types.FlowChartDiagram.Id) {
 
             if (_inEditItem.ItemTypeId == _types.FlowChartDiagram.Id || _inEditItem.ItemTypeId == _types.FlowChartSubGraph.Id) {
+
               lbShape.Text = "Align:";
               edLine2.Text = _inEditItem.Title;
               int orientationId = _inEditItem.OrientationId;
               ConfigureComboBoxTypes(cbShape, orientationId, _types.GetChildrenItemsNoDef(_types.FlowChartOrientation.Id));
+
             } else if (_inEditItem.ItemTypeId == _types.FlowChartNode.Id) {
 
-              cbExpandedShape.Text = "Use Expanded Shapes";
-              if (!cbExpandedShape.Visible) cbExpandedShape.Visible = true;
+              cbExpandedShape.Text = "Use Expanded Shapes";              
               if (cbExpandedShape.Checked != _inEditItem.IsExpandedShape) {
                 cbExpandedShape.Checked = _inEditItem.IsExpandedShape;
               }
 
-              lbShape.Text = "Shape";
+              lbShape.Text = "Shape:";
               if (cbExpandedShape.Checked) {
                 ConfigureComboBoxTypes(cbShape, _inEditItem.ShapeId, _types.GetChildrenItemsNoDef(_types.FlowChartExtShape.Id));
               } else {
@@ -632,20 +636,19 @@ namespace Algos
               }
 
             } else if (_inEditItem.ItemTypeId == _types.FlowChartLink.Id) {
-
-              if (!cbExpandedShape.Visible) cbExpandedShape.Visible = true;
+                            
               cbExpandedShape.Text = "Link Multi Directional";
               if (cbExpandedShape.Checked != _inEditItem.IsLinkMultidirectional) {
                 cbExpandedShape.Checked = _inEditItem.IsLinkMultidirectional;
               }
 
-              lbShape.Text = "Link To";
+              lbShape.Text = "Link To:";
               ConfigureComboBoxItems(cbShape, _inEditItem.OrientationId, _itemService.GetFlowchartNodes(diagramNode));
 
-              lbEdit2.Text = "Line Style";
+              lbEdit2.Text = "Line Style:";
               ConfigureComboBoxTypes(cbEdit2, _inEditItem.LinkLineStyleId, _types.GetChildrenItemsNoDef(_types.FlowChartLinkLineStyle.Id));
 
-              lbEdit3.Text = "Link Ends";
+              lbEdit3.Text = "Link Ends:";
               ConfigureComboBoxTypes(cbEdit3, _inEditItem.LinkEndingId, _types.GetChildrenItemsNoDef(_types.FlowChartLinkEnding.Id));
             }
 
