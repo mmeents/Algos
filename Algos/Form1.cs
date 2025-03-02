@@ -458,7 +458,6 @@ namespace Algos
         DoDragDrop(e.Item, DragDropEffects.Move);
       }
     }
-
     private void treeView1_DragDrop(object sender, DragEventArgs e) {
       try {
         Point targetPt = treeView1.PointToClient(new Point(e.X, e.Y));
@@ -475,11 +474,9 @@ namespace Algos
       } finally {
       }
     }
-
     private void treeView1_DragEnter(object sender, DragEventArgs e) {
       e.Effect = DragDropEffects.Move;
     }
-
     private void treeView1_DragOver(object sender, DragEventArgs e) {
       if (e.Data != null) {
         Item selectedItem = (Item)e.Data.GetData(typeof(Item));
@@ -494,15 +491,16 @@ namespace Algos
               if ((targetDiagramNode?.ItemTypeId ?? 0) == (selectedDiagramNode?.ItemTypeId ?? 1)) {
 
                 if (!targetNode.IsExpanded) targetNode.Expand();
-                if (targetNode.ItemTypeId == _types.MindMapDiagram.Id) {
+                if (targetNode.ItemTypeId == _types.MindMapDiagram.Id 
+                  || targetNode.ItemTypeId == _types.MindMapNodes.Id
+                ){
                   e.Effect = DragDropEffects.Move;
-                } else if (targetNode.ItemTypeId == _types.FlowChartDiagram.Id && selectedItem.ItemTypeId == _types.FlowChartNode.Id) {
+                } 
+                else if (targetNode.ItemTypeId == _types.FlowChartDiagram.Id 
+                  || targetNode.ItemTypeId == _types.FlowChartNode.Id
+                  || targetNode.ItemTypeId == _types.FlowChartSubGraph.Id
+                ){
                   e.Effect = DragDropEffects.Move;
-                } else if (targetNode.ItemTypeId == _types.FlowChartNode.Id &&
-                  (selectedItem.ItemTypeId == _types.FlowChartNode.Id || selectedItem.ItemTypeId == _types.FlowChartLink.Id)) {
-                  e.Effect = DragDropEffects.Move;
-                } else if (targetNode.ItemTypeId == _types.FlowChartLink.Id) {
-                  e.Effect = DragDropEffects.None;
                 } else {
                   e.Effect = DragDropEffects.None;
                 }
@@ -609,13 +607,15 @@ namespace Algos
           var diagramNode = _itemService.GetDiagramNode(_inEditItem);
           if (diagramNode.ItemTypeId == _types.MindMapDiagram.Id) {
             lbShape.Text = "Shape";
-            ConfigureComboBoxTypes(cbShape, _inEditItem.ShapeId, _types.GetChildrenItemsNoDef(_types.MindMapShapes.Id));
+            int shapeId = _inEditItem.ShapeId;
+            ConfigureComboBoxTypes(cbShape, shapeId, _types.GetChildrenItemsNoDef(_types.MindMapShapes.Id));
           } else if (diagramNode.ItemTypeId == _types.FlowChartDiagram.Id) {
 
             if (_inEditItem.ItemTypeId == _types.FlowChartDiagram.Id || _inEditItem.ItemTypeId == _types.FlowChartSubGraph.Id) {
               lbShape.Text = "Align:";
               edLine2.Text = _inEditItem.Title;
-              ConfigureComboBoxTypes(cbShape, _inEditItem.OrientationId, _types.GetChildrenItemsNoDef(_types.FlowChartOrientation.Id));
+              int orientationId = _inEditItem.OrientationId;
+              ConfigureComboBoxTypes(cbShape, orientationId, _types.GetChildrenItemsNoDef(_types.FlowChartOrientation.Id));
             } else if (_inEditItem.ItemTypeId == _types.FlowChartNode.Id) {
 
               cbExpandedShape.Text = "Use Expanded Shapes";
@@ -679,7 +679,7 @@ namespace Algos
     }
 
     private void ConfigureComboBoxTypes(ComboBox cb, int SelectedIndex, IEnumerable<ItemType>? types) {
-      if (types != null) {
+      if (types != null) {        
         cb.DataSource = types;
         cb.DisplayMember = "Name";
         cb.ValueMember = "Id";
@@ -688,7 +688,7 @@ namespace Algos
           if (item != null) {
             cb.SelectedValue = item.Id;
           } else {
-            cb.SelectedIndex = types.First().Id;
+            cb.SelectedValue = types.First().Id;
           }
         } catch (Exception e2) {
           LogMsg(e2.Message);
