@@ -8,6 +8,12 @@ using System.Threading.Tasks;
 
 namespace Algos.Core.Models
 {
+  public enum Imgs {    
+    DiagramImage = 1,
+    NodeImage = 2,       
+    LinkImage = 3,    
+  }
+
   public class Types : ConcurrentDictionary<int, ItemType> {
     public Types() : base() {
       Load();
@@ -15,12 +21,15 @@ namespace Algos.Core.Models
 
     public ItemType DiagramGroup { get; set; }
     public ItemType MindMapDiagram { get; set; }
+
     public ItemType MindMapNodes { get; set; }
     public ItemType MindMapShapes { get; set; }
     public ItemType MindMapShapeDef { get; set; }
 
+
     public ItemType FlowChartDiagram { get; set; }
     public ItemType FlowChartNode { get; set; }
+    public ItemType FlowChartSubGraph { get; set; }
     public ItemType FlowChartLink { get; set; }
     public ItemType FlowChartShapes { get; set; }
     public ItemType FlowChartExtShape { get; set;}
@@ -36,8 +45,8 @@ namespace Algos.Core.Models
       DiagramGroup = AddRootType("Diagram Types", "Group to house the different diagram types.");
 
       #region MindMap Diagram Types
-      MindMapDiagram = AddVisibleChildType(DiagramGroup, "Mind Map Diagram", "Mind map diagram ");
-      MindMapNodes = AddVisibleChildType(MindMapDiagram, "MindMap Node", "Mind map types");
+      MindMapDiagram = AddVisibleNodeType(DiagramGroup, "Mind Map Diagram", "Mind map diagram ", (int)Imgs.DiagramImage );
+      MindMapNodes = AddVisibleNodeType(MindMapDiagram, "MindMap Node", "Mind map types", (int)Imgs.NodeImage);
 
       MindMapShapes = AddRootType("MindMap Shapes", "Group to house the different diagram types.");
         var mindMapShapeDefault = AddVisibleChildType(MindMapShapes, "Default", "Mind map shape default");
@@ -57,9 +66,10 @@ namespace Algos.Core.Models
         MindMapShapeDef = mindMapShapeDefault;
       #endregion
       #region FlowChart Diagram Types
-      FlowChartDiagram = AddVisibleChildType(DiagramGroup, "Flow Chart Diagram", "Flow chart diagram ");
-      FlowChartNode = AddVisibleChildType(FlowChartDiagram, "FlowChart Node", "Flow chart types");
-      FlowChartLink = AddVisibleChildType(FlowChartNode, "FlowChart Link", "Flow chart link types");
+      FlowChartDiagram = AddVisibleNodeType(DiagramGroup, "Flow Chart Diagram", "Flow chart diagram ", (int)Imgs.DiagramImage);
+      FlowChartNode = AddVisibleNodeType(FlowChartDiagram, "FlowChart Node", "Flow chart types", (int)Imgs.NodeImage);      
+      FlowChartLink = AddVisibleNodeType(FlowChartNode, "FlowChart Link", "Flow chart link types", (int)Imgs.LinkImage);
+      FlowChartSubGraph = AddVisibleNodeType(FlowChartNode, "FlowChart SubGraph", "Flow chart subgraph types", (int)Imgs.DiagramImage);
 
       #region Standard FlowChart Shapes
 
@@ -227,7 +237,28 @@ namespace Algos.Core.Models
     }
 
     public ItemType AddVisibleChildType(ItemType item, string name, string desc) {
-      ItemType type = new ItemType() { OwnerId = item.Id, ImageIndex = item.ImageIndex + 1, IsVisible = true, Name = name, Desc = desc };
+      ItemType type = new ItemType() { 
+        OwnerId = item.Id, 
+        ImageIndex = item.ImageIndex + 1, 
+        IsVisible = true, 
+        Name = name, 
+        Desc = desc 
+      };
+      if (type.Id == 0) {
+        type.Id = GetNextId();
+      }
+      base[type.Id] = type;
+      return type;
+    }
+
+    public ItemType AddVisibleNodeType(ItemType item, string name, string desc, int imageIndex) {
+      ItemType type = new ItemType() {
+        OwnerId = item.Id,
+        ImageIndex = imageIndex,        
+        IsVisible = true,
+        Name = name,
+        Desc = desc
+      };
       if (type.Id == 0) {
         type.Id = GetNextId();
       }

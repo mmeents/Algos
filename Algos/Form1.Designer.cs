@@ -54,7 +54,6 @@
       removeSelectedItemToolStripMenuItem = new ToolStripMenuItem();
       imageList2 = new ImageList(components);
       lbLine2 = new Label();
-      edLine2 = new TextBox();
       lbEdit3 = new Label();
       cbEdit3 = new ComboBox();
       lbTech = new Label();
@@ -67,9 +66,11 @@
       btnSave = new Button();
       label1 = new Label();
       edName = new TextBox();
+      edLine2 = new TextBox();
       wbOut = new Microsoft.Web.WebView2.WinForms.WebView2();
       edLogMsg = new TextBox();
       odMain = new OpenFileDialog();
+      addFlowchartSubGraphToolStripMenuItem = new ToolStripMenuItem();
       panel1.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
       splitContainer1.Panel1.SuspendLayout();
@@ -227,16 +228,16 @@
       // contextMenuStrip1
       // 
       contextMenuStrip1.ImageScalingSize = new Size(20, 20);
-      contextMenuStrip1.Items.AddRange(new ToolStripItem[] { newDiagramToolStripMenuItem, addMindMapNodeMenuItem, addFlowchartNodeMenuItem, addFlowchartLinkMenuItem, toolStripSeparator1, MoveItemUpMenuItem, toolStripSeparator2, LocalCopyMenuItem, LocalPasteMenuItem, toolStripSeparator3, removeSelectedItemToolStripMenuItem });
+      contextMenuStrip1.Items.AddRange(new ToolStripItem[] { newDiagramToolStripMenuItem, addMindMapNodeMenuItem, addFlowchartNodeMenuItem, addFlowchartSubGraphToolStripMenuItem, addFlowchartLinkMenuItem, toolStripSeparator1, MoveItemUpMenuItem, toolStripSeparator2, LocalCopyMenuItem, LocalPasteMenuItem, toolStripSeparator3, removeSelectedItemToolStripMenuItem });
       contextMenuStrip1.Name = "contextMenuStrip1";
-      contextMenuStrip1.Size = new Size(228, 214);
+      contextMenuStrip1.Size = new Size(244, 266);
       contextMenuStrip1.Opening += contextMenuStrip1_Opening;
       // 
       // newDiagramToolStripMenuItem
       // 
       newDiagramToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { newMindMapDialogToolStripMenuItem, newFlowchartDiagramMenuItem });
       newDiagramToolStripMenuItem.Name = "newDiagramToolStripMenuItem";
-      newDiagramToolStripMenuItem.Size = new Size(227, 24);
+      newDiagramToolStripMenuItem.Size = new Size(243, 24);
       newDiagramToolStripMenuItem.Text = "New Diagram";
       // 
       // newMindMapDialogToolStripMenuItem
@@ -256,64 +257,64 @@
       // addMindMapNodeMenuItem
       // 
       addMindMapNodeMenuItem.Name = "addMindMapNodeMenuItem";
-      addMindMapNodeMenuItem.Size = new Size(227, 24);
+      addMindMapNodeMenuItem.Size = new Size(243, 24);
       addMindMapNodeMenuItem.Text = "Add Mindmap Node";
       addMindMapNodeMenuItem.Click += addMindmapNodeMenuItem_Click;
       // 
       // addFlowchartNodeMenuItem
       // 
       addFlowchartNodeMenuItem.Name = "addFlowchartNodeMenuItem";
-      addFlowchartNodeMenuItem.Size = new Size(227, 24);
+      addFlowchartNodeMenuItem.Size = new Size(243, 24);
       addFlowchartNodeMenuItem.Text = "Add Flowchart Node";
       addFlowchartNodeMenuItem.Click += addFlowchartNodeMenuItem_Click;
       // 
       // addFlowchartLinkMenuItem
       // 
       addFlowchartLinkMenuItem.Name = "addFlowchartLinkMenuItem";
-      addFlowchartLinkMenuItem.Size = new Size(227, 24);
+      addFlowchartLinkMenuItem.Size = new Size(243, 24);
       addFlowchartLinkMenuItem.Text = "Add Flowchart Link";
       addFlowchartLinkMenuItem.Click += addFlowchartLinkMenuItem_Click;
       // 
       // toolStripSeparator1
       // 
       toolStripSeparator1.Name = "toolStripSeparator1";
-      toolStripSeparator1.Size = new Size(224, 6);
+      toolStripSeparator1.Size = new Size(240, 6);
       // 
       // MoveItemUpMenuItem
       // 
       MoveItemUpMenuItem.Name = "MoveItemUpMenuItem";
-      MoveItemUpMenuItem.Size = new Size(227, 24);
+      MoveItemUpMenuItem.Size = new Size(243, 24);
       MoveItemUpMenuItem.Text = "Move Item Up";
       MoveItemUpMenuItem.Click += MoveItemUpMenuItem_Click;
       // 
       // toolStripSeparator2
       // 
       toolStripSeparator2.Name = "toolStripSeparator2";
-      toolStripSeparator2.Size = new Size(224, 6);
+      toolStripSeparator2.Size = new Size(240, 6);
       // 
       // LocalCopyMenuItem
       // 
       LocalCopyMenuItem.Name = "LocalCopyMenuItem";
-      LocalCopyMenuItem.Size = new Size(227, 24);
+      LocalCopyMenuItem.Size = new Size(243, 24);
       LocalCopyMenuItem.Text = "Local Copy Item";
       LocalCopyMenuItem.Click += LocalCopyMenuItem_Click;
       // 
       // LocalPasteMenuItem
       // 
       LocalPasteMenuItem.Name = "LocalPasteMenuItem";
-      LocalPasteMenuItem.Size = new Size(227, 24);
+      LocalPasteMenuItem.Size = new Size(243, 24);
       LocalPasteMenuItem.Text = "Local Paste Copied ";
       LocalPasteMenuItem.Click += LocalPasteMenuItem_Click;
       // 
       // toolStripSeparator3
       // 
       toolStripSeparator3.Name = "toolStripSeparator3";
-      toolStripSeparator3.Size = new Size(224, 6);
+      toolStripSeparator3.Size = new Size(240, 6);
       // 
       // removeSelectedItemToolStripMenuItem
       // 
       removeSelectedItemToolStripMenuItem.Name = "removeSelectedItemToolStripMenuItem";
-      removeSelectedItemToolStripMenuItem.Size = new Size(227, 24);
+      removeSelectedItemToolStripMenuItem.Size = new Size(243, 24);
       removeSelectedItemToolStripMenuItem.Text = "Remove Selected Item";
       removeSelectedItemToolStripMenuItem.Click += removeSelectedItemToolStripMenuItem_Click;
       // 
@@ -335,15 +336,6 @@
       lbLine2.Size = new Size(41, 20);
       lbLine2.TabIndex = 13;
       lbLine2.Text = "Title:";
-      // 
-      // edLine2
-      // 
-      edLine2.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-      edLine2.Location = new Point(83, 67);
-      edLine2.Name = "edLine2";
-      edLine2.Size = new Size(270, 27);
-      edLine2.TabIndex = 12;
-      edLine2.TextChanged += edLine2_TextChanged;
       // 
       // lbEdit3
       // 
@@ -469,6 +461,15 @@
       edName.TabIndex = 0;
       edName.TextChanged += edName_TextChanged;
       // 
+      // edLine2
+      // 
+      edLine2.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+      edLine2.Location = new Point(83, 67);
+      edLine2.Name = "edLine2";
+      edLine2.Size = new Size(270, 27);
+      edLine2.TabIndex = 12;
+      edLine2.TextChanged += edLine2_TextChanged;
+      // 
       // wbOut
       // 
       wbOut.AllowExternalDrop = true;
@@ -497,6 +498,13 @@
       odMain.Filter = "ALGOS File|*.algos";
       odMain.SelectReadOnly = false;
       odMain.Title = "Identify an ALGOS File, or name a new one.";
+      // 
+      // addFlowchartSubGraphToolStripMenuItem
+      // 
+      addFlowchartSubGraphToolStripMenuItem.Name = "addFlowchartSubGraphToolStripMenuItem";
+      addFlowchartSubGraphToolStripMenuItem.Size = new Size(243, 24);
+      addFlowchartSubGraphToolStripMenuItem.Text = "Add Flowchart SubGraph";
+      addFlowchartSubGraphToolStripMenuItem.Click += addFlowchartSubGraphToolStripMenuItem_Click;
       // 
       // Form1
       // 
@@ -571,5 +579,6 @@
     private Label lbEdit3;
     private TextBox edLine2;
     private Label lbLine2;
+    private ToolStripMenuItem addFlowchartSubGraphToolStripMenuItem;
   }
 }

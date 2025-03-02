@@ -11,7 +11,7 @@ using FileTables.Interfaces;
 
 namespace Algos.Core
 {
- public class ItemService { 
+  public class ItemService { 
     private TreeView _treeView;
     private ItemFileTable _itemFileTable;
     private ILogMsg _logMsg;
@@ -27,15 +27,7 @@ namespace Algos.Core
       _items = new(_itemFileTable.AllItems());
     }
 
-    public void LoadTreeviewItems(TreeView ownerItem) {
-      ownerItem.Nodes.Clear();
-      IEnumerable<Item> result = _items.GetChildrenItems(0);
-      foreach (Item item in result) {
-        ownerItem.Nodes.Add(LoadChildren(item));
-      }
-    }
-
-    public Item LoadChildren(Item item) {
+    private Item LoadChildren(Item item) {
       try {
         var items = _items.GetChildrenItems(item.Id);
         item.ImageIndex = _types[item.ItemTypeId].ImageIndex;
@@ -53,6 +45,14 @@ namespace Algos.Core
       return item;
     }
 
+    public void LoadTreeviewItems(TreeView ownerItem) {
+      ownerItem.Nodes.Clear();
+      IEnumerable<Item> result = _items.GetChildrenItems(0);
+      foreach (Item item in result) {
+        ownerItem.Nodes.Add(LoadChildren(item));
+      }
+    }
+
     public int GetDiagramCount() {
       var toCountList = _items.AsList;
       if (toCountList.Count() > 0) {
@@ -60,6 +60,20 @@ namespace Algos.Core
       } else {
         return 0;
       }      
+    }
+
+    public Item? GetDiagramNode(Item it) {
+      if (it == null) return null;
+      var diagramNodes = _types.DiagramTypes;
+      if (diagramNodes.Contains(it.ItemTypeId)) {
+        return it;
+      } else {
+        if (it.Parent == null) {
+          return null;
+        } else {
+          return GetDiagramNode((Item)it.Parent);
+        }
+      }
     }
 
     private IEnumerable<Item> GetChildrenFlowchartNodes(Item flowchartNode) {
@@ -132,7 +146,7 @@ namespace Algos.Core
       _itemFileTable.Update(item, doSave);
     }
 
-    public void NestedRemoveItem(Item item) {
+    private void NestedRemoveItem(Item item) {
       if (item == null) return;
       if (item.Nodes.Count == 0) {        
         _items.Remove(item.Id);
@@ -184,6 +198,7 @@ namespace Algos.Core
       return DragItem;
     }
 
+    #region Copy Item  
     private bool IsDescendant(Item potentialDescendant, Item potentialAncestor) {
       Item current = potentialDescendant;
       while (current != null) {
@@ -209,18 +224,49 @@ namespace Algos.Core
 
     private void RecursiveCopyFlowchartNodeTo(Item newOwnerItem, Item itemToCopy) {
 
+      Item innerNextItem = null;
       if (itemToCopy.ItemTypeId == _types.FlowChartNode.Id) {
-        Item newItem = itemToCopy.AsClone();
-        newItem.Id = _items.GetNextId();
-        copyNodeLookups[itemToCopy.Id] = newItem.Id;
-        newItem.OwnerId = newOwnerItem.Id;
-        _items[newItem.Id] = newItem;
-        _itemFileTable.Insert(newItem, false);
-        newOwnerItem.Nodes.Add(newItem);      
-        foreach (Item child in itemToCopy.Nodes) {
-          RecursiveCopyFlowchartNodeTo(newItem, child);
-        }
+        innerNextItem = itemToCopy.AsClone();
+        innerNextItem.Id = _items.GetNextId();
+        copyNodeLookups[itemToCopy.Id] = innerNextItem.Id;
+        innerNextItem.OwnerId = newOwnerItem.Id;
+        _items[innerNextItem.Id] = innerNextItem;
+        _itemFileTable.Insert(innerNextItem, false);
+        newOwnerItem.Nodes.Add(innerNextItem);
+      } else if (itemToCopy.ItemTypeId == _types.FlowChartSubGraph.Id) {
+        return;
+      } else {
+        innerNextItem = _items[copyNodeLookups[itemToCopy.Id]];
       }
+
+      foreach (Item child in itemToCopy.Nodes) {
+        RecursiveCopyFlowchartNodeTo(innerNextItem, child);
+      }      
+    }
+
+    private void RecursiveCopyFlowchartSubgraph(Item newOwnerItem, Item itemToCopy ) {
+      Item innerNextItem = null;
+      if (itemToCopy.ItemTypeId == _types.FlowChartSubGraph.Id) {
+        innerNextItem = itemToCopy.AsClone();
+        innerNextItem.Id = _items.GetNextId();
+        innerNextItem.OwnerId = newOwnerItem.Id;
+        _items[innerNextItem.Id] = innerNextItem;
+        _itemFileTable.Insert(innerNextItem, false);
+        newOwnerItem.Nodes.Add(innerNextItem);
+
+        foreach (Item child in itemToCopy.Nodes) {
+          RecursiveCopyFlowchartNodeTo(innerNextItem, child);
+        }
+        foreach (Item child in itemToCopy.Nodes) {
+          RecursiveCopyFlowchartSubgraph(innerNextItem, child);
+        }        
+
+      } else {
+        innerNextItem = _items[copyNodeLookups[itemToCopy.Id]];
+        foreach (Item child in itemToCopy.Nodes) {
+          RecursiveCopyFlowchartSubgraph(innerNextItem, child);
+        }
+      }      
     }
 
     private void RecursiveCopyFlowchartLinks(Item newOwnerItem, Item itemToCopy) {
@@ -260,25 +306,14 @@ namespace Algos.Core
       } else if (newOwnerDiagram.ItemTypeId == _types.FlowChartDiagram.Id) {
         copyNodeLookups.Clear();
         RecursiveCopyFlowchartNodeTo(newOwnerItem, itemToCopy);
+        RecursiveCopyFlowchartSubgraph(newOwnerItem, itemToCopy);
         RecursiveCopyFlowchartLinks(newOwnerItem, itemToCopy);
       }
       
       _itemFileTable.Save();
     }
 
-    public Item? GetDiagramNode(Item it) {
-      if (it == null) return null;
-      var diagramNodes = _types.DiagramTypes;
-      if (diagramNodes.Contains(it.ItemTypeId)) {
-        return it;
-      } else {
-        if (it.Parent == null) {
-          return null;
-        } else {
-          return GetDiagramNode((Item)it.Parent);
-        }
-      }
-    }
+    #endregion
 
   }
 }

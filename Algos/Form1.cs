@@ -10,6 +10,8 @@ using System.Collections.Concurrent;
 using FoggyBalrog.MermaidDotNet.Flowchart.Model;
 using FoggyBalrog.MermaidDotNet.Configuration.Model;
 using FoggyBalrog.MermaidDotNet.Flowchart;
+using static System.Net.Mime.MediaTypeNames;
+using System;
 
 namespace Algos
 {
@@ -248,7 +250,7 @@ namespace Algos
           if (cbShape.BackColor != Color.LightYellow) cbShape.BackColor = Color.LightYellow;
           if (cbEdit2.BackColor != Color.LightYellow) cbEdit2.BackColor = Color.LightYellow;
           if (cbEdit3.BackColor != Color.LightYellow) cbEdit3.BackColor = Color.LightYellow;
-        //  if (cbExpandedShape.BackColor != Color.LightYellow) cbExpandedShape.BackColor = Color.LightYellow;
+          //  if (cbExpandedShape.BackColor != Color.LightYellow) cbExpandedShape.BackColor = Color.LightYellow;
           if (edLine2.BackColor != Color.LightYellow) edLine2.BackColor = Color.LightYellow;
         } else {
           if (btnSave.Visible) btnSave.Visible = false;
@@ -257,7 +259,7 @@ namespace Algos
           if (cbShape.BackColor != Color.White) cbShape.BackColor = Color.White;
           if (cbEdit2.BackColor != Color.White) cbEdit2.BackColor = Color.White;
           if (cbEdit3.BackColor != Color.White) cbEdit3.BackColor = Color.White;
-         // if (cbExpandedShape.BackColor != Color.White) cbExpandedShape.BackColor = Color.White;
+          // if (cbExpandedShape.BackColor != Color.White) cbExpandedShape.BackColor = Color.White;
           if (edLine2.BackColor != Color.White) edLine2.BackColor = Color.White;
         }
       }
@@ -269,34 +271,46 @@ namespace Algos
     private void contextMenuStrip1_Opening(object sender, System.ComponentModel.CancelEventArgs e) {
       if (_inEditItem == null) {
         addFlowchartNodeMenuItem.Visible = false;
+        addFlowchartSubGraphToolStripMenuItem.Visible = false;
         addFlowchartLinkMenuItem.Visible = false;
         addMindMapNodeMenuItem.Visible = false;
         removeSelectedItemToolStripMenuItem.Visible = false;
         LocalCopyMenuItem.Visible = false;
+
       } else {
         var diagramNode = _itemService.GetDiagramNode(_inEditItem);
         if (diagramNode.ItemTypeId == _types.MindMapDiagram.Id) {
           addFlowchartNodeMenuItem.Visible = false;
           addFlowchartLinkMenuItem.Visible = false;
+          addFlowchartSubGraphToolStripMenuItem.Visible = false;
           addMindMapNodeMenuItem.Visible = true;
         } else if (diagramNode.ItemTypeId == _types.FlowChartDiagram.Id) {
           if (_inEditItem.ItemTypeId == _types.FlowChartDiagram.Id) {
             addFlowchartNodeMenuItem.Visible = true;
             addFlowchartLinkMenuItem.Visible = false;
             addMindMapNodeMenuItem.Visible = false;
+            addFlowchartSubGraphToolStripMenuItem.Visible = true;
           } else if (_inEditItem.ItemTypeId == _types.FlowChartNode.Id) {
             addFlowchartNodeMenuItem.Visible = true;
             addFlowchartLinkMenuItem.Visible = true;
             addMindMapNodeMenuItem.Visible = false;
+            addFlowchartSubGraphToolStripMenuItem.Visible = true;
+          } else if (_inEditItem.ItemTypeId == _types.FlowChartSubGraph.Id) {
+            addFlowchartNodeMenuItem.Visible = true;
+            addFlowchartLinkMenuItem.Visible = true;
+            addMindMapNodeMenuItem.Visible = false;
+            addFlowchartSubGraphToolStripMenuItem.Visible = true;
           } else {
             addFlowchartNodeMenuItem.Visible = false;
             addFlowchartLinkMenuItem.Visible = false;
             addMindMapNodeMenuItem.Visible = false;
+            addFlowchartSubGraphToolStripMenuItem.Visible = false;
           }
         } else {
           addFlowchartNodeMenuItem.Visible = false;
           addFlowchartLinkMenuItem.Visible = false;
           addMindMapNodeMenuItem.Visible = false;
+          addFlowchartSubGraphToolStripMenuItem.Visible = false;
         }
         removeSelectedItemToolStripMenuItem.Visible = true;
         LocalCopyMenuItem.Visible = true;
@@ -329,14 +343,20 @@ namespace Algos
     }
     private void addFlowchartNodeMenuItem_Click(object sender, EventArgs e) {
       if (_inEditItem != null &&
-          (_inEditItem.ItemTypeId == _types.FlowChartDiagram.Id || _inEditItem.ItemTypeId == _types.FlowChartNode.Id)) {
+        (_inEditItem.ItemTypeId == _types.FlowChartDiagram.Id || _inEditItem.ItemTypeId == _types.FlowChartNode.Id || _inEditItem.ItemTypeId == _types.FlowChartSubGraph.Id)) {
         var newFlowChartNode = _itemService.SaveNewChildItemsFromText(_inEditItem, _types.FlowChartNode, "item");
       }
     }
     private void addFlowchartLinkMenuItem_Click(object sender, EventArgs e) {
       if (_inEditItem != null &&
-          (_inEditItem.ItemTypeId == _types.FlowChartNode.Id || _inEditItem.ItemTypeId == _types.FlowChartLink.Id)) {
+        (_inEditItem.ItemTypeId == _types.FlowChartNode.Id || _inEditItem.ItemTypeId == _types.FlowChartLink.Id || _inEditItem.ItemTypeId == _types.FlowChartSubGraph.Id)) {
         var newFlowChartLink = _itemService.SaveNewChildItemsFromText(_inEditItem, _types.FlowChartLink, "is");
+      }
+    }
+    private void addFlowchartSubGraphToolStripMenuItem_Click(object sender, EventArgs e) {
+      if (_inEditItem != null &&
+        (_inEditItem.ItemTypeId == _types.FlowChartNode.Id || _inEditItem.ItemTypeId == _types.FlowChartLink.Id || _inEditItem.ItemTypeId == _types.FlowChartSubGraph.Id)) {
+        var newFlowChartLink = _itemService.SaveNewChildItemsFromText(_inEditItem, _types.FlowChartSubGraph, "sub");
       }
     }
     private void MoveItemUpMenuItem_Click(object sender, EventArgs e) {
@@ -438,7 +458,6 @@ namespace Algos
         DoDragDrop(e.Item, DragDropEffects.Move);
       }
     }
-
     private void treeView1_DragDrop(object sender, DragEventArgs e) {
       try {
         Point targetPt = treeView1.PointToClient(new Point(e.X, e.Y));
@@ -455,11 +474,9 @@ namespace Algos
       } finally {
       }
     }
-
     private void treeView1_DragEnter(object sender, DragEventArgs e) {
       e.Effect = DragDropEffects.Move;
     }
-
     private void treeView1_DragOver(object sender, DragEventArgs e) {
       if (e.Data != null) {
         Item selectedItem = (Item)e.Data.GetData(typeof(Item));
@@ -474,15 +491,16 @@ namespace Algos
               if ((targetDiagramNode?.ItemTypeId ?? 0) == (selectedDiagramNode?.ItemTypeId ?? 1)) {
 
                 if (!targetNode.IsExpanded) targetNode.Expand();
-                if (targetNode.ItemTypeId == _types.MindMapDiagram.Id) {
+                if (targetNode.ItemTypeId == _types.MindMapDiagram.Id 
+                  || targetNode.ItemTypeId == _types.MindMapNodes.Id
+                ){
                   e.Effect = DragDropEffects.Move;
-                } else if (targetNode.ItemTypeId == _types.FlowChartDiagram.Id && selectedItem.ItemTypeId == _types.FlowChartNode.Id) {
+                } 
+                else if (targetNode.ItemTypeId == _types.FlowChartDiagram.Id 
+                  || targetNode.ItemTypeId == _types.FlowChartNode.Id
+                  || targetNode.ItemTypeId == _types.FlowChartSubGraph.Id
+                ){
                   e.Effect = DragDropEffects.Move;
-                } else if (targetNode.ItemTypeId == _types.FlowChartNode.Id &&
-                  (selectedItem.ItemTypeId == _types.FlowChartNode.Id || selectedItem.ItemTypeId == _types.FlowChartLink.Id)) {
-                  e.Effect = DragDropEffects.Move;
-                } else if (targetNode.ItemTypeId == _types.FlowChartLink.Id) {
-                  e.Effect = DragDropEffects.None;
                 } else {
                   e.Effect = DragDropEffects.None;
                 }
@@ -542,6 +560,14 @@ namespace Algos
             if (lbEdit3.Visible) lbEdit3.Visible = false;
             if (lbLine2.Visible) lbLine2.Visible = false;
             if (edLine2.Visible) edLine2.Visible = false;
+          } else if (_inEditItem.ItemTypeId == _types.FlowChartSubGraph.Id) {
+            if (cbExpandedShape.Visible) cbExpandedShape.Visible = false;
+            if (cbEdit2.Visible) cbEdit2.Visible = false;
+            if (lbEdit2.Visible) lbEdit2.Visible = false;
+            if (cbEdit3.Visible) cbEdit3.Visible = false;
+            if (lbEdit3.Visible) lbEdit3.Visible = false;
+            if (lbLine2.Visible) lbLine2.Visible = false;
+            if (edLine2.Visible) edLine2.Visible = false;
           } else if (_inEditItem.ItemTypeId == _types.FlowChartLink.Id) {
             if (!cbExpandedShape.Visible) cbExpandedShape.Visible = true;
             if (!cbEdit2.Visible) cbEdit2.Visible = true;
@@ -581,13 +607,15 @@ namespace Algos
           var diagramNode = _itemService.GetDiagramNode(_inEditItem);
           if (diagramNode.ItemTypeId == _types.MindMapDiagram.Id) {
             lbShape.Text = "Shape";
-            ConfigureComboBoxTypes(cbShape, _inEditItem.ShapeId, _types.GetChildrenItemsNoDef(_types.MindMapShapes.Id));
+            int shapeId = _inEditItem.ShapeId;
+            ConfigureComboBoxTypes(cbShape, shapeId, _types.GetChildrenItemsNoDef(_types.MindMapShapes.Id));
           } else if (diagramNode.ItemTypeId == _types.FlowChartDiagram.Id) {
 
-            if (_inEditItem.ItemTypeId == _types.FlowChartDiagram.Id) {
+            if (_inEditItem.ItemTypeId == _types.FlowChartDiagram.Id || _inEditItem.ItemTypeId == _types.FlowChartSubGraph.Id) {
               lbShape.Text = "Align:";
               edLine2.Text = _inEditItem.Title;
-              ConfigureComboBoxTypes(cbShape, _inEditItem.OrientationId, _types.GetChildrenItemsNoDef(_types.FlowChartOrientation.Id));
+              int orientationId = _inEditItem.OrientationId;
+              ConfigureComboBoxTypes(cbShape, orientationId, _types.GetChildrenItemsNoDef(_types.FlowChartOrientation.Id));
             } else if (_inEditItem.ItemTypeId == _types.FlowChartNode.Id) {
 
               cbExpandedShape.Text = "Use Expanded Shapes";
@@ -651,7 +679,7 @@ namespace Algos
     }
 
     private void ConfigureComboBoxTypes(ComboBox cb, int SelectedIndex, IEnumerable<ItemType>? types) {
-      if (types != null) {
+      if (types != null) {        
         cb.DataSource = types;
         cb.DisplayMember = "Name";
         cb.ValueMember = "Id";
@@ -660,7 +688,7 @@ namespace Algos
           if (item != null) {
             cb.SelectedValue = item.Id;
           } else {
-            cb.SelectedIndex = types.First().Id;
+            cb.SelectedValue = types.First().Id;
           }
         } catch (Exception e2) {
           LogMsg(e2.Message);
@@ -707,7 +735,7 @@ namespace Algos
             InEdit = true;
           }
         } else if (diagramNode.ItemTypeId == _types.FlowChartDiagram.Id) {
-          if (_inEditItem.ItemTypeId == _types.FlowChartDiagram.Id) {
+          if (_inEditItem.ItemTypeId == _types.FlowChartDiagram.Id || _inEditItem.ItemTypeId == _types.FlowChartSubGraph.Id) {
             if (cbShape.SelectedValue != null && _inEditItem.OrientationId != cbShape.SelectedValue.AsInt32()) {
               InEdit = true;
             }
@@ -768,7 +796,7 @@ namespace Algos
 
         } else if (diagramNode.ItemTypeId == _types.FlowChartDiagram.Id) {
 
-          if (_inEditItem.ItemTypeId == _types.FlowChartDiagram.Id) {
+          if (_inEditItem.ItemTypeId == _types.FlowChartDiagram.Id || _inEditItem.ItemTypeId == _types.FlowChartSubGraph.Id) {
             if (cbShape.SelectedValue != null && _inEditItem.OrientationId != cbShape.SelectedValue.AsInt32()) {
               _inEditItem.OrientationId = cbShape.SelectedValue.AsInt32();
               _inEditItem.Title = edLine2.Text;
@@ -814,6 +842,7 @@ namespace Algos
 
     private ConcurrentDictionary<int, FoggyBalrog.MermaidDotNet.MindMap.Model.Node> _mindmapNodes = new();
     private ConcurrentDictionary<int, FoggyBalrog.MermaidDotNet.Flowchart.Model.Node> _flowchartNodes = new();
+    private ConcurrentDictionary<int, FoggyBalrog.MermaidDotNet.Flowchart.Model.Subgraph> _flowchartSubgraphs = new();
     private MindMapBuilder AddNodeByItem(Item it, MindMapBuilder mindMapBuilder) {
 
       var aParent = _mindmapNodes.ContainsKey(it.OwnerId) ? _mindmapNodes[it.OwnerId] : null;
@@ -831,47 +860,127 @@ namespace Algos
       return mindMapBuilder;
     }
 
+    private string MakeMindmapDiagram(Item diagram) {
+      _mindmapNodes.Clear();
+      string sRootText = diagram.Name;
+      string sRootTitle = diagram.Name;
+      MermaidConfig? aMermaidConfig = null;
+      bool bIsMarkown = diagram.IsMarkdown;
+      var aNodeShape = FoggyBalrog.MermaidDotNet.MindMap.Model.NodeShape.Default;
+      string? sRootIcon = diagram.IconUrl.Length > 0 ? diagram.IconUrl : null;
+      string[]? saRootClasses = diagram.CssClass.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+      var mindMapBuilder = Mermaid.MindMap(sRootText, sRootTitle, aMermaidConfig, aNodeShape, bIsMarkown, sRootIcon, saRootClasses);
+      foreach (var child in diagram.Nodes) {
+        AddNodeByItem((Item)child, mindMapBuilder);
+      }
+      return mindMapBuilder.Build();
+    }
+
     private FlowchartBuilder AddFlowChartNodeByItem(Item it, FlowchartBuilder flowChartBuilder) {
+      try {
+        var bIsMarkdown = it.IsMarkdown;
+        var ShowIcon = it.IconUrl.Length > 0 ? it.IconUrl : null;
+        var saClasses = it.CssClass.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
-      var bIsMarkdown = it.IsMarkdown;
-      var ShowIcon = it.IconUrl.Length > 0 ? it.IconUrl : null;
-      var saClasses = it.CssClass.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (it.ItemTypeId == _types.FlowChartNode.Id) {
 
-      if (it.ItemTypeId == _types.FlowChartNode.Id) {
+          if (it.IsExpandedShape) {
+            var aShape = _types[it.ShapeId].FlowChartExpandedNodeShape;
+            _ = flowChartBuilder.AddNodeWithExpandedShape(it.Name, out FoggyBalrog.MermaidDotNet.Flowchart.Model.Node nNode, aShape);
+            if (nNode != null) _flowchartNodes[it.Id] = nNode;
+          } else {
+            _ = flowChartBuilder.AddNode(it.Name, out FoggyBalrog.MermaidDotNet.Flowchart.Model.Node nNode, _types[it.ShapeId].FlowChartNodeShape);
+            if (nNode != null) _flowchartNodes[it.Id] = nNode;
+          }
 
-        if (it.IsExpandedShape) {
-          var aShape = _types[it.ShapeId].FlowChartExpandedNodeShape;
-          _ = flowChartBuilder.AddNodeWithExpandedShape(it.Name, out FoggyBalrog.MermaidDotNet.Flowchart.Model.Node nNode, aShape);
-          if (nNode != null) _flowchartNodes[it.Id] = nNode;
-        } else {
-          _ = flowChartBuilder.AddNode(it.Name, out FoggyBalrog.MermaidDotNet.Flowchart.Model.Node nNode, _types[it.ShapeId].FlowChartNodeShape);
-          if (nNode != null) _flowchartNodes[it.Id] = nNode;
+        } else if (it.ItemTypeId == _types.FlowChartSubGraph.Id) {
+          return flowChartBuilder;
         }
 
-      }
+        foreach (var child in it.Nodes) {
+          AddFlowChartNodeByItem((Item)child, flowChartBuilder);
+        }
+        return flowChartBuilder;
 
-      foreach (var child in it.Nodes) {
-        AddFlowChartNodeByItem((Item)child, flowChartBuilder);
+      } catch (Exception e) {
+        LogMsg(e.Message);
+        return flowChartBuilder;
       }
-      return flowChartBuilder;
     }
 
     private FlowchartBuilder AddFlowChartLinkByItem(Item it, FlowchartBuilder flowChartBuilder) {
+      try {
 
-      if (it.ItemTypeId == _types.FlowChartLink.Id) {
-        var aLineStyle = _types[it.LinkLineStyleId].FlowChartLinkLineStyle;
-        var aLinkEnding = _types[it.LinkEndingId].FlowChartLinkEnding;
-        var LinkToNode = _flowchartNodes.ContainsKey(it.OrientationId) ? _flowchartNodes[it.OrientationId] : null;
-        var LinkFromNode = _flowchartNodes.ContainsKey(it.OwnerId) ? _flowchartNodes[it.OwnerId] : null;
-        if (LinkToNode != null && LinkFromNode != null) {
-          _ = flowChartBuilder.AddLink(LinkFromNode, LinkToNode, out Link nLink, it.Name, aLineStyle, aLinkEnding, it.IsLinkMultidirectional, 0);
+        if (it.ItemTypeId == _types.FlowChartLink.Id) {
+          var aLineStyle = _types[it.LinkLineStyleId].FlowChartLinkLineStyle;
+          var aLinkEnding = _types[it.LinkEndingId].FlowChartLinkEnding;
+          var LinkToNode = _flowchartNodes.ContainsKey(it.OrientationId) ? _flowchartNodes[it.OrientationId] : null;
+          var LinkFromNode = _flowchartNodes.ContainsKey(it.OwnerId) ? _flowchartNodes[it.OwnerId] : null;
+          if (LinkToNode != null && LinkFromNode != null) {
+            _ = flowChartBuilder.AddLink(LinkFromNode, LinkToNode, out Link nLink, it.Name, aLineStyle, aLinkEnding, it.IsLinkMultidirectional, 0);
+          }
+        } else if (it.ItemTypeId == _types.FlowChartSubGraph.Id) {
+          return flowChartBuilder;
         }
-      }
 
-      foreach (var child in it.Nodes) {
-        AddFlowChartLinkByItem((Item)child, flowChartBuilder);
+        foreach (var child in it.Nodes) {
+          AddFlowChartLinkByItem((Item)child, flowChartBuilder);
+        }
+        return flowChartBuilder;
+
+      } catch (Exception e) {
+        LogMsg(e.Message);
+        return flowChartBuilder;
       }
-      return flowChartBuilder;
+    }
+
+    private FlowchartBuilder AddFlowChartSubGraphByItem(Item it, FlowchartBuilder flowChartBuilder) {
+      try {
+        if (it.ItemTypeId == _types.FlowChartSubGraph.Id) {
+          var aTitle = it.Name;
+          var aOrientation = _types[it.OrientationId].FlowChartOrientation;
+          var subGraph = flowChartBuilder.AddSubgraph(aTitle, out Subgraph subgraph, builder => {
+            foreach (var child in it.Nodes) {
+              AddFlowChartNodeByItem((Item)child, builder);
+            }
+            foreach (var child in it.Nodes) {
+              AddFlowChartSubGraphByItem((Item)child, flowChartBuilder);
+            }
+            foreach (var child in it.Nodes) {
+              AddFlowChartLinkByItem((Item)child, builder);
+            }
+          }, aOrientation);
+          if (subgraph != null) _flowchartSubgraphs[it.Id] = subgraph;
+        } else {
+          foreach (var child in it.Nodes) {
+            AddFlowChartSubGraphByItem((Item)child, flowChartBuilder);
+          }
+        }
+
+        return flowChartBuilder;
+      } catch (Exception e) {
+        LogMsg(e.Message);
+        return flowChartBuilder;
+      }
+    }
+
+
+    private string MakeFlowchartDiagram(Item diagram) {
+      _flowchartNodes.Clear();
+      _flowchartSubgraphs.Clear();
+      var aTitle = diagram.Name;
+      var aOrientation = _types[diagram.OrientationId].FlowChartOrientation;
+      var flowchartBuilder = Mermaid.Flowchart(aTitle, null, aOrientation);
+      foreach (var child in diagram.Nodes) {
+        AddFlowChartNodeByItem((Item)child, flowchartBuilder);
+      }
+      foreach (var child in diagram.Nodes) {
+        AddFlowChartSubGraphByItem((Item)child, flowchartBuilder);
+      }
+      foreach (var child in diagram.Nodes) {
+        AddFlowChartLinkByItem((Item)child, flowchartBuilder);
+      }
+      return flowchartBuilder.Build();
     }
 
     private string PrepareDiagramScript(Item it) {
@@ -882,41 +991,9 @@ namespace Algos
         throw new Exception("No diagram found?");
       }
       if (diagramNode.ItemTypeId == _types.MindMapDiagram.Id) {
-        _mindmapNodes.Clear();
-
-        string sRootText = diagramNode.Name;
-        string sRootTitle = diagramNode.Name;
-        MermaidConfig? aMermaidConfig = null;
-        bool bIsMarkown = diagramNode.IsMarkdown;
-        var aNodeShape = FoggyBalrog.MermaidDotNet.MindMap.Model.NodeShape.Default;
-        string? sRootIcon = diagramNode.IconUrl.Length > 0 ? diagramNode.IconUrl : null;
-        string[]? saRootClasses = diagramNode.CssClass.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-
-        var mindMapBuilder = Mermaid.MindMap(sRootText, sRootTitle, aMermaidConfig, aNodeShape, bIsMarkown, sRootIcon, saRootClasses);
-
-        foreach (var child in diagramNode.Nodes) {
-          AddNodeByItem((Item)child, mindMapBuilder);
-        }
-
-        return mindMapBuilder.Build();
-
+        return MakeMindmapDiagram(diagramNode);
       } else if (diagramNode.ItemTypeId == _types.FlowChartDiagram.Id) {
-
-        _flowchartNodes = new();
-        var aTitle = diagramNode.Title;
-        var aOrientation = _types[diagramNode.OrientationId].FlowChartOrientation;
-
-        var flowchartBuilder = Mermaid.Flowchart(aTitle, null, aOrientation);
-
-        foreach (var child in diagramNode.Nodes) {
-          AddFlowChartNodeByItem((Item)child, flowchartBuilder);
-        }
-
-        foreach (var child in diagramNode.Nodes) {
-          AddFlowChartLinkByItem((Item)child, flowchartBuilder);
-        }
-        return flowchartBuilder.Build();
-
+        return MakeFlowchartDiagram(diagramNode);
       }
       throw new Exception("Diagram type not yet supported");
     }
@@ -978,5 +1055,6 @@ namespace Algos
 
 
 
+    
   }
 }
