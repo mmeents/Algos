@@ -24,6 +24,7 @@ namespace Algos.Core.Models
     public FoggyBalrog.MermaidDotNet.Flowchart.Model.LinkEnding FlowChartLinkEnding { get; set; } = FoggyBalrog.MermaidDotNet.Flowchart.Model.LinkEnding.Arrow;
     public FoggyBalrog.MermaidDotNet.Flowchart.Model.LinkLineStyle FlowChartLinkLineStyle { get; set; } = FoggyBalrog.MermaidDotNet.Flowchart.Model.LinkLineStyle.Solid;
 
+    public FoggyBalrog.MermaidDotNet.ClassDiagram.Model.ClassDiagramDirection ClassDiagramDirection { get; set; } = FoggyBalrog.MermaidDotNet.ClassDiagram.Model.ClassDiagramDirection.TopToBottom;
 
   }
 
