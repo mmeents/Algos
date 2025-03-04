@@ -526,8 +526,9 @@ namespace Algos
         treeView1.SelectedNode = ParentItem;
         ParentItem.Nodes.Remove(item);
       }
-      _itemService.RemoveItem(_inEditItem);
+      _itemService.RemoveItem(item);
       treeView1_AfterSelect(sender, new TreeViewEventArgs(ParentItem));
+      PopulateDisplays();
     }
     #endregion
 
@@ -897,7 +898,7 @@ namespace Algos
               lbLine2.Text = "Type:";
               edLine2.Text = _inEditItem.Title;
             } else if (_inEditItem.ItemTypeId == _types.CdMethod.Id) {
-              lbLine2.Text = "Return:";
+              lbLine2.Text = "Returns:";
               edLine2.Text = _inEditItem.Title;
             } else if (_inEditItem.ItemTypeId == _types.CdParameters.Id) {
               lbLine2.Text = "Type:";
