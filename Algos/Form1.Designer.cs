@@ -42,9 +42,17 @@
       newDiagramToolStripMenuItem = new ToolStripMenuItem();
       newMindMapDialogToolStripMenuItem = new ToolStripMenuItem();
       newFlowchartDiagramMenuItem = new ToolStripMenuItem();
+      newClassDiagramMenuItem = new ToolStripMenuItem();
       addMindMapNodeMenuItem = new ToolStripMenuItem();
       addFlowchartNodeMenuItem = new ToolStripMenuItem();
+      addFlowchartSubGraphToolStripMenuItem = new ToolStripMenuItem();
       addFlowchartLinkMenuItem = new ToolStripMenuItem();
+      addNameSpaceToolStripMenuItem = new ToolStripMenuItem();
+      addClassToolStripMenuItem = new ToolStripMenuItem();
+      addClassPropertyToolStripMenuItem = new ToolStripMenuItem();
+      addClassMethToolStripMenuItem = new ToolStripMenuItem();
+      addMethodParamToolStripMenuItem = new ToolStripMenuItem();
+      addClassRelationshipMenuItem = new ToolStripMenuItem();
       toolStripSeparator1 = new ToolStripSeparator();
       MoveItemUpMenuItem = new ToolStripMenuItem();
       toolStripSeparator2 = new ToolStripSeparator();
@@ -64,13 +72,14 @@
       cbShape = new ComboBox();
       btnCancel = new Button();
       btnSave = new Button();
-      label1 = new Label();
+      lbName = new Label();
       edName = new TextBox();
       edLine2 = new TextBox();
+      cbShowMermaidScript = new CheckBox();
+      btnRefresh = new Button();
       wbOut = new Microsoft.Web.WebView2.WinForms.WebView2();
       edLogMsg = new TextBox();
       odMain = new OpenFileDialog();
-      addFlowchartSubGraphToolStripMenuItem = new ToolStripMenuItem();
       panel1.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
       splitContainer1.Panel1.SuspendLayout();
@@ -93,7 +102,7 @@
       panel1.Dock = DockStyle.Top;
       panel1.Location = new Point(0, 0);
       panel1.Name = "panel1";
-      panel1.Size = new Size(1095, 60);
+      panel1.Size = new Size(1095, 46);
       panel1.TabIndex = 0;
       // 
       // comboBox1
@@ -158,7 +167,7 @@
       // 
       splitContainer1.BorderStyle = BorderStyle.Fixed3D;
       splitContainer1.Dock = DockStyle.Fill;
-      splitContainer1.Location = new Point(0, 60);
+      splitContainer1.Location = new Point(0, 46);
       splitContainer1.Name = "splitContainer1";
       // 
       // splitContainer1.Panel1
@@ -167,9 +176,11 @@
       // 
       // splitContainer1.Panel2
       // 
+      splitContainer1.Panel2.Controls.Add(cbShowMermaidScript);
+      splitContainer1.Panel2.Controls.Add(btnRefresh);
       splitContainer1.Panel2.Controls.Add(wbOut);
       splitContainer1.Panel2.Controls.Add(edLogMsg);
-      splitContainer1.Size = new Size(1095, 826);
+      splitContainer1.Size = new Size(1095, 840);
       splitContainer1.SplitterDistance = 364;
       splitContainer1.TabIndex = 1;
       // 
@@ -198,11 +209,11 @@
       splitContainer2.Panel2.Controls.Add(cbShape);
       splitContainer2.Panel2.Controls.Add(btnCancel);
       splitContainer2.Panel2.Controls.Add(btnSave);
-      splitContainer2.Panel2.Controls.Add(label1);
+      splitContainer2.Panel2.Controls.Add(lbName);
       splitContainer2.Panel2.Controls.Add(edName);
       splitContainer2.Panel2.Controls.Add(edLine2);
-      splitContainer2.Size = new Size(364, 826);
-      splitContainer2.SplitterDistance = 494;
+      splitContainer2.Size = new Size(364, 840);
+      splitContainer2.SplitterDistance = 502;
       splitContainer2.TabIndex = 0;
       // 
       // treeView1
@@ -216,7 +227,7 @@
       treeView1.Location = new Point(0, 0);
       treeView1.Name = "treeView1";
       treeView1.SelectedImageIndex = 0;
-      treeView1.Size = new Size(360, 490);
+      treeView1.Size = new Size(360, 498);
       treeView1.TabIndex = 0;
       treeView1.AfterLabelEdit += treeView1_AfterLabelEdit;
       treeView1.ItemDrag += treeView1_ItemDrag;
@@ -228,14 +239,14 @@
       // contextMenuStrip1
       // 
       contextMenuStrip1.ImageScalingSize = new Size(20, 20);
-      contextMenuStrip1.Items.AddRange(new ToolStripItem[] { newDiagramToolStripMenuItem, addMindMapNodeMenuItem, addFlowchartNodeMenuItem, addFlowchartSubGraphToolStripMenuItem, addFlowchartLinkMenuItem, toolStripSeparator1, MoveItemUpMenuItem, toolStripSeparator2, LocalCopyMenuItem, LocalPasteMenuItem, toolStripSeparator3, removeSelectedItemToolStripMenuItem });
+      contextMenuStrip1.Items.AddRange(new ToolStripItem[] { newDiagramToolStripMenuItem, addMindMapNodeMenuItem, addFlowchartNodeMenuItem, addFlowchartSubGraphToolStripMenuItem, addFlowchartLinkMenuItem, addNameSpaceToolStripMenuItem, addClassToolStripMenuItem, addClassPropertyToolStripMenuItem, addClassMethToolStripMenuItem, addMethodParamToolStripMenuItem, addClassRelationshipMenuItem, toolStripSeparator1, MoveItemUpMenuItem, toolStripSeparator2, LocalCopyMenuItem, LocalPasteMenuItem, toolStripSeparator3, removeSelectedItemToolStripMenuItem });
       contextMenuStrip1.Name = "contextMenuStrip1";
-      contextMenuStrip1.Size = new Size(244, 266);
+      contextMenuStrip1.Size = new Size(244, 382);
       contextMenuStrip1.Opening += contextMenuStrip1_Opening;
       // 
       // newDiagramToolStripMenuItem
       // 
-      newDiagramToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { newMindMapDialogToolStripMenuItem, newFlowchartDiagramMenuItem });
+      newDiagramToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { newMindMapDialogToolStripMenuItem, newFlowchartDiagramMenuItem, newClassDiagramMenuItem });
       newDiagramToolStripMenuItem.Name = "newDiagramToolStripMenuItem";
       newDiagramToolStripMenuItem.Size = new Size(243, 24);
       newDiagramToolStripMenuItem.Text = "New Diagram";
@@ -254,6 +265,13 @@
       newFlowchartDiagramMenuItem.Text = "New Flowchart Diagram";
       newFlowchartDiagramMenuItem.Click += newFlowchartDiagramMenuItem_Click;
       // 
+      // newClassDiagramMenuItem
+      // 
+      newClassDiagramMenuItem.Name = "newClassDiagramMenuItem";
+      newClassDiagramMenuItem.Size = new Size(252, 26);
+      newClassDiagramMenuItem.Text = "New Class Diagram";
+      newClassDiagramMenuItem.Click += newClassDiagramMenuItem_Click;
+      // 
       // addMindMapNodeMenuItem
       // 
       addMindMapNodeMenuItem.Name = "addMindMapNodeMenuItem";
@@ -268,12 +286,61 @@
       addFlowchartNodeMenuItem.Text = "Add Flowchart Node";
       addFlowchartNodeMenuItem.Click += addFlowchartNodeMenuItem_Click;
       // 
+      // addFlowchartSubGraphToolStripMenuItem
+      // 
+      addFlowchartSubGraphToolStripMenuItem.Name = "addFlowchartSubGraphToolStripMenuItem";
+      addFlowchartSubGraphToolStripMenuItem.Size = new Size(243, 24);
+      addFlowchartSubGraphToolStripMenuItem.Text = "Add Flowchart SubGraph";
+      addFlowchartSubGraphToolStripMenuItem.Click += addFlowchartSubGraphToolStripMenuItem_Click;
+      // 
       // addFlowchartLinkMenuItem
       // 
       addFlowchartLinkMenuItem.Name = "addFlowchartLinkMenuItem";
       addFlowchartLinkMenuItem.Size = new Size(243, 24);
       addFlowchartLinkMenuItem.Text = "Add Flowchart Link";
       addFlowchartLinkMenuItem.Click += addFlowchartLinkMenuItem_Click;
+      // 
+      // addNameSpaceToolStripMenuItem
+      // 
+      addNameSpaceToolStripMenuItem.Name = "addNameSpaceToolStripMenuItem";
+      addNameSpaceToolStripMenuItem.Size = new Size(243, 24);
+      addNameSpaceToolStripMenuItem.Text = "Add Name Space";
+      addNameSpaceToolStripMenuItem.Click += addNameSpaceToolStripMenuItem_Click;
+      // 
+      // addClassToolStripMenuItem
+      // 
+      addClassToolStripMenuItem.Name = "addClassToolStripMenuItem";
+      addClassToolStripMenuItem.Size = new Size(243, 24);
+      addClassToolStripMenuItem.Text = "Add Class";
+      addClassToolStripMenuItem.Click += addClassToolStripMenuItem_Click;
+      // 
+      // addClassPropertyToolStripMenuItem
+      // 
+      addClassPropertyToolStripMenuItem.Name = "addClassPropertyToolStripMenuItem";
+      addClassPropertyToolStripMenuItem.Size = new Size(243, 24);
+      addClassPropertyToolStripMenuItem.Text = "Add Class Property";
+      addClassPropertyToolStripMenuItem.Click += addClassPropertyToolStripMenuItem_Click;
+      // 
+      // addClassMethToolStripMenuItem
+      // 
+      addClassMethToolStripMenuItem.Name = "addClassMethToolStripMenuItem";
+      addClassMethToolStripMenuItem.Size = new Size(243, 24);
+      addClassMethToolStripMenuItem.Text = "Add Class Method";
+      addClassMethToolStripMenuItem.Click += addClassMethToolStripMenuItem_Click;
+      // 
+      // addMethodParamToolStripMenuItem
+      // 
+      addMethodParamToolStripMenuItem.Name = "addMethodParamToolStripMenuItem";
+      addMethodParamToolStripMenuItem.Size = new Size(243, 24);
+      addMethodParamToolStripMenuItem.Text = "Add Method Param";
+      addMethodParamToolStripMenuItem.Click += addMethodParamToolStripMenuItem_Click;
+      // 
+      // addClassRelationshipMenuItem
+      // 
+      addClassRelationshipMenuItem.Name = "addClassRelationshipMenuItem";
+      addClassRelationshipMenuItem.Size = new Size(243, 24);
+      addClassRelationshipMenuItem.Text = "Add Class Relationship";
+      addClassRelationshipMenuItem.Click += addClassRelationshipMenuItem_Click;
       // 
       // toolStripSeparator1
       // 
@@ -417,40 +484,36 @@
       // btnCancel
       // 
       btnCancel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-      btnCancel.ImageAlign = ContentAlignment.MiddleLeft;
       btnCancel.ImageIndex = 3;
       btnCancel.ImageList = imageList1;
-      btnCancel.Location = new Point(267, 5);
+      btnCancel.Location = new Point(321, 5);
       btnCancel.Name = "btnCancel";
-      btnCancel.Size = new Size(87, 28);
+      btnCancel.Size = new Size(33, 28);
       btnCancel.TabIndex = 3;
-      btnCancel.Text = "Cancel";
       btnCancel.UseVisualStyleBackColor = true;
       btnCancel.Click += btnCancel_Click;
       // 
       // btnSave
       // 
       btnSave.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-      btnSave.ImageAlign = ContentAlignment.MiddleLeft;
       btnSave.ImageIndex = 4;
       btnSave.ImageList = imageList1;
-      btnSave.Location = new Point(184, 5);
+      btnSave.Location = new Point(290, 5);
       btnSave.Name = "btnSave";
-      btnSave.Size = new Size(84, 28);
+      btnSave.Size = new Size(30, 28);
       btnSave.TabIndex = 2;
-      btnSave.Text = "Save";
       btnSave.TextAlign = ContentAlignment.TopCenter;
       btnSave.UseVisualStyleBackColor = true;
       btnSave.Click += btnSave_Click;
       // 
-      // label1
+      // lbName
       // 
-      label1.AutoSize = true;
-      label1.Location = new Point(13, 40);
-      label1.Name = "label1";
-      label1.Size = new Size(52, 20);
-      label1.TabIndex = 1;
-      label1.Text = "Name:";
+      lbName.AutoSize = true;
+      lbName.Location = new Point(13, 40);
+      lbName.Name = "lbName";
+      lbName.Size = new Size(52, 20);
+      lbName.TabIndex = 1;
+      lbName.Text = "Name:";
       // 
       // edName
       // 
@@ -470,25 +533,50 @@
       edLine2.TabIndex = 12;
       edLine2.TextChanged += edLine2_TextChanged;
       // 
+      // cbShowMermaidScript
+      // 
+      cbShowMermaidScript.Appearance = Appearance.Button;
+      cbShowMermaidScript.AutoSize = true;
+      cbShowMermaidScript.Location = new Point(29, 4);
+      cbShowMermaidScript.Name = "cbShowMermaidScript";
+      cbShowMermaidScript.Size = new Size(79, 30);
+      cbShowMermaidScript.TabIndex = 17;
+      cbShowMermaidScript.Text = "Mermaid";
+      cbShowMermaidScript.UseVisualStyleBackColor = true;
+      cbShowMermaidScript.CheckedChanged += cbShowMermaidScript_CheckedChanged;
+      // 
+      // btnRefresh
+      // 
+      btnRefresh.ImageAlign = ContentAlignment.MiddleLeft;
+      btnRefresh.ImageIndex = 0;
+      btnRefresh.ImageList = imageList1;
+      btnRefresh.Location = new Point(3, 4);
+      btnRefresh.Name = "btnRefresh";
+      btnRefresh.Size = new Size(24, 30);
+      btnRefresh.TabIndex = 16;
+      btnRefresh.UseVisualStyleBackColor = true;
+      btnRefresh.Click += btnRefresh_Click;
+      // 
       // wbOut
       // 
       wbOut.AllowExternalDrop = true;
       wbOut.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
       wbOut.CreationProperties = null;
       wbOut.DefaultBackgroundColor = Color.White;
-      wbOut.Location = new Point(24, 17);
+      wbOut.Location = new Point(3, 36);
       wbOut.Name = "wbOut";
-      wbOut.Size = new Size(689, 641);
+      wbOut.Size = new Size(716, 658);
       wbOut.TabIndex = 1;
       wbOut.ZoomFactor = 1D;
       // 
       // edLogMsg
       // 
       edLogMsg.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-      edLogMsg.Location = new Point(24, 690);
+      edLogMsg.Location = new Point(3, 704);
       edLogMsg.Multiline = true;
       edLogMsg.Name = "edLogMsg";
-      edLogMsg.Size = new Size(689, 122);
+      edLogMsg.ScrollBars = ScrollBars.Vertical;
+      edLogMsg.Size = new Size(716, 122);
       edLogMsg.TabIndex = 0;
       // 
       // odMain
@@ -498,13 +586,6 @@
       odMain.Filter = "ALGOS File|*.algos";
       odMain.SelectReadOnly = false;
       odMain.Title = "Identify an ALGOS File, or name a new one.";
-      // 
-      // addFlowchartSubGraphToolStripMenuItem
-      // 
-      addFlowchartSubGraphToolStripMenuItem.Name = "addFlowchartSubGraphToolStripMenuItem";
-      addFlowchartSubGraphToolStripMenuItem.Size = new Size(243, 24);
-      addFlowchartSubGraphToolStripMenuItem.Text = "Add Flowchart SubGraph";
-      addFlowchartSubGraphToolStripMenuItem.Click += addFlowchartSubGraphToolStripMenuItem_Click;
       // 
       // Form1
       // 
@@ -553,7 +634,7 @@
     private ToolStripMenuItem newDiagramToolStripMenuItem;
     private ToolStripMenuItem newMindMapDialogToolStripMenuItem;
     private ImageList imageList2;
-    private Label label1;
+    private Label lbName;
     private TextBox edName;
     private Button btnCancel;
     private Button btnSave;
@@ -580,5 +661,14 @@
     private TextBox edLine2;
     private Label lbLine2;
     private ToolStripMenuItem addFlowchartSubGraphToolStripMenuItem;
+    private ToolStripMenuItem newClassDiagramMenuItem;
+    private ToolStripMenuItem addNameSpaceToolStripMenuItem;
+    private ToolStripMenuItem addClassToolStripMenuItem;
+    private ToolStripMenuItem addClassPropertyToolStripMenuItem;
+    private ToolStripMenuItem addClassMethToolStripMenuItem;
+    private ToolStripMenuItem addMethodParamToolStripMenuItem;
+    private ToolStripMenuItem addClassRelationshipMenuItem;
+    private Button btnRefresh;
+    private CheckBox cbShowMermaidScript;
   }
 }

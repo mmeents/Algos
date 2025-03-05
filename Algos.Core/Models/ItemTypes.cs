@@ -1,4 +1,5 @@
 ﻿using FileTables;
+using FoggyBalrog.MermaidDotNet.ClassDiagram.Model;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -41,8 +42,16 @@ namespace Algos.Core.Models
     public ItemType FlowChartLinkLineStyle { get; set; }
     #endregion
     #region Class Diagram Types
-    
-  
+    public ItemType ClassDiagram { get; set; }
+    public ItemType CdNamespace { get; set; }
+    public ItemType ClassDiagramDirection { get; set; }
+    public ItemType CdClass { get; set; }
+    public ItemType CdProperty { get; set; }
+    public ItemType CdMethod { get; set; }
+    public ItemType CdParameters { get; set; }
+    public ItemType CdRelationship { get; set; }
+    public ItemType ClassDiagramCardinality { get; set; }
+
     #endregion
 
 
@@ -231,6 +240,35 @@ namespace Algos.Core.Models
       #endregion
       #endregion
       #region Class Diagram Types
+        ClassDiagram = AddVisibleNodeType(DiagramGroup, "Class Diagram", "Class diagram ", (int)Imgs.DiagramImage);
+        CdNamespace = AddVisibleNodeType(ClassDiagram, "Namespace", "Namespace types", (int)Imgs.NodeImage);
+        CdClass = AddVisibleNodeType(CdNamespace, "Class", "Class types", (int)Imgs.NodeImage);
+        CdProperty = AddVisibleNodeType(CdClass, "Property", "Property types", (int)Imgs.NodeImage);
+        CdMethod = AddVisibleNodeType(CdClass, "Method", "Method types", (int)Imgs.NodeImage);
+        CdParameters = AddVisibleNodeType(CdMethod, "Parameters", "Parameters types", (int)Imgs.NodeImage);
+        CdRelationship = AddVisibleNodeType(CdClass, "Relationship", "Relationship types", (int)Imgs.LinkImage);
+            
+       ClassDiagramDirection = AddRootType("ClassDiagramDirection", "Class Diagram Direction types");
+        var ClassDiagramDirectionTopToBottom = AddVisibleChildType(ClassDiagramDirection, "TopToBottom", "Flow chart orientation TopToBottom");
+        ClassDiagramDirectionTopToBottom.ClassDiagramDirection = FoggyBalrog.MermaidDotNet.ClassDiagram.Model.ClassDiagramDirection.TopToBottom;
+        var ClassDiagramDirectionBottomToTop = AddVisibleChildType(ClassDiagramDirection, "BottomToTop", "Flow chart orientation BottomToTop");
+        ClassDiagramDirectionBottomToTop.ClassDiagramDirection = FoggyBalrog.MermaidDotNet.ClassDiagram.Model.ClassDiagramDirection.BottomToTop;
+        var ClassDiagramDirectionLeftToRight = AddVisibleChildType(ClassDiagramDirection, "LeftToRight", "Flow chart orientation LeftToRight");
+        ClassDiagramDirectionLeftToRight.ClassDiagramDirection = FoggyBalrog.MermaidDotNet.ClassDiagram.Model.ClassDiagramDirection.LeftToRight;
+        var ClassDiagramDirectionRightToLeft = AddVisibleChildType(ClassDiagramDirection, "RightToLeft", "Flow chart orientation RightToLeft");
+        ClassDiagramDirectionRightToLeft.ClassDiagramDirection = FoggyBalrog.MermaidDotNet.ClassDiagram.Model.ClassDiagramDirection.RightToLeft;
+       
+       ClassDiagramCardinality = AddRootType("ClassDiagramCardinality", "Class Diagram Cardinality types");
+        var ClassDiagramCardinalityOne = AddVisibleChildType(ClassDiagramCardinality, "One", "Class Diagram Cardinality One");
+        ClassDiagramCardinalityOne.ClassDiagramCardinality = FoggyBalrog.MermaidDotNet.ClassDiagram.Model.Cardinality.One;
+        var ClassDiagramCardinalityMany = AddVisibleChildType(ClassDiagramCardinality, "Any", "Class Diagram Cardinality Any");
+        ClassDiagramCardinalityMany.ClassDiagramCardinality = FoggyBalrog.MermaidDotNet.ClassDiagram.Model.Cardinality.Any;
+        var ClassDiagramCardinalityZeroOrOne = AddVisibleChildType(ClassDiagramCardinality, "ZeroOrOne", "Class Diagram Cardinality ZeroOrOne");
+        ClassDiagramCardinalityZeroOrOne.ClassDiagramCardinality = FoggyBalrog.MermaidDotNet.ClassDiagram.Model.Cardinality.ZeroOrOne;
+        var ClassDiagramCardinalityZeroOrMany = AddVisibleChildType(ClassDiagramCardinality, "ZeroOrMore", "Class Diagram Cardinality ZeroOrMore");
+        ClassDiagramCardinalityZeroOrMany.ClassDiagramCardinality = FoggyBalrog.MermaidDotNet.ClassDiagram.Model.Cardinality.ZeroOrMore;
+
+
 
       #endregion
     }
@@ -332,6 +370,21 @@ namespace Algos.Core.Models
           _diagramTypes = GetDiagramTypes();
         }
         return _diagramTypes;
+      }
+    }
+
+    private HashSet<int> _classTypes;
+    public HashSet<int> ClassTypes {
+      get {
+        if (_classTypes == null) {
+          _classTypes = new();
+          _classTypes.Add(ClassDiagram.Id);          
+          _classTypes.Add(CdClass.Id);
+          _classTypes.Add(CdProperty.Id);
+          _classTypes.Add(CdMethod.Id);
+          _classTypes.Add(CdParameters.Id);
+        }         
+        return _classTypes;
       }
     }
     #endregion
