@@ -52,6 +52,7 @@
       addClassPropertyToolStripMenuItem = new ToolStripMenuItem();
       addClassMethToolStripMenuItem = new ToolStripMenuItem();
       addMethodParamToolStripMenuItem = new ToolStripMenuItem();
+      addClassRelationshipMenuItem = new ToolStripMenuItem();
       toolStripSeparator1 = new ToolStripSeparator();
       MoveItemUpMenuItem = new ToolStripMenuItem();
       toolStripSeparator2 = new ToolStripSeparator();
@@ -60,7 +61,6 @@
       toolStripSeparator3 = new ToolStripSeparator();
       removeSelectedItemToolStripMenuItem = new ToolStripMenuItem();
       imageList2 = new ImageList(components);
-      btnRefresh = new Button();
       lbLine2 = new Label();
       lbEdit3 = new Label();
       cbEdit3 = new ComboBox();
@@ -75,6 +75,8 @@
       lbName = new Label();
       edName = new TextBox();
       edLine2 = new TextBox();
+      cbShowMermaidScript = new CheckBox();
+      btnRefresh = new Button();
       wbOut = new Microsoft.Web.WebView2.WinForms.WebView2();
       edLogMsg = new TextBox();
       odMain = new OpenFileDialog();
@@ -100,7 +102,7 @@
       panel1.Dock = DockStyle.Top;
       panel1.Location = new Point(0, 0);
       panel1.Name = "panel1";
-      panel1.Size = new Size(1095, 60);
+      panel1.Size = new Size(1095, 46);
       panel1.TabIndex = 0;
       // 
       // comboBox1
@@ -165,7 +167,7 @@
       // 
       splitContainer1.BorderStyle = BorderStyle.Fixed3D;
       splitContainer1.Dock = DockStyle.Fill;
-      splitContainer1.Location = new Point(0, 60);
+      splitContainer1.Location = new Point(0, 46);
       splitContainer1.Name = "splitContainer1";
       // 
       // splitContainer1.Panel1
@@ -174,9 +176,11 @@
       // 
       // splitContainer1.Panel2
       // 
+      splitContainer1.Panel2.Controls.Add(cbShowMermaidScript);
+      splitContainer1.Panel2.Controls.Add(btnRefresh);
       splitContainer1.Panel2.Controls.Add(wbOut);
       splitContainer1.Panel2.Controls.Add(edLogMsg);
-      splitContainer1.Size = new Size(1095, 826);
+      splitContainer1.Size = new Size(1095, 840);
       splitContainer1.SplitterDistance = 364;
       splitContainer1.TabIndex = 1;
       // 
@@ -194,7 +198,6 @@
       // 
       // splitContainer2.Panel2
       // 
-      splitContainer2.Panel2.Controls.Add(btnRefresh);
       splitContainer2.Panel2.Controls.Add(lbLine2);
       splitContainer2.Panel2.Controls.Add(lbEdit3);
       splitContainer2.Panel2.Controls.Add(cbEdit3);
@@ -209,8 +212,8 @@
       splitContainer2.Panel2.Controls.Add(lbName);
       splitContainer2.Panel2.Controls.Add(edName);
       splitContainer2.Panel2.Controls.Add(edLine2);
-      splitContainer2.Size = new Size(364, 826);
-      splitContainer2.SplitterDistance = 494;
+      splitContainer2.Size = new Size(364, 840);
+      splitContainer2.SplitterDistance = 502;
       splitContainer2.TabIndex = 0;
       // 
       // treeView1
@@ -224,7 +227,7 @@
       treeView1.Location = new Point(0, 0);
       treeView1.Name = "treeView1";
       treeView1.SelectedImageIndex = 0;
-      treeView1.Size = new Size(360, 490);
+      treeView1.Size = new Size(360, 498);
       treeView1.TabIndex = 0;
       treeView1.AfterLabelEdit += treeView1_AfterLabelEdit;
       treeView1.ItemDrag += treeView1_ItemDrag;
@@ -236,9 +239,9 @@
       // contextMenuStrip1
       // 
       contextMenuStrip1.ImageScalingSize = new Size(20, 20);
-      contextMenuStrip1.Items.AddRange(new ToolStripItem[] { newDiagramToolStripMenuItem, addMindMapNodeMenuItem, addFlowchartNodeMenuItem, addFlowchartSubGraphToolStripMenuItem, addFlowchartLinkMenuItem, addNameSpaceToolStripMenuItem, addClassToolStripMenuItem, addClassPropertyToolStripMenuItem, addClassMethToolStripMenuItem, addMethodParamToolStripMenuItem, toolStripSeparator1, MoveItemUpMenuItem, toolStripSeparator2, LocalCopyMenuItem, LocalPasteMenuItem, toolStripSeparator3, removeSelectedItemToolStripMenuItem });
+      contextMenuStrip1.Items.AddRange(new ToolStripItem[] { newDiagramToolStripMenuItem, addMindMapNodeMenuItem, addFlowchartNodeMenuItem, addFlowchartSubGraphToolStripMenuItem, addFlowchartLinkMenuItem, addNameSpaceToolStripMenuItem, addClassToolStripMenuItem, addClassPropertyToolStripMenuItem, addClassMethToolStripMenuItem, addMethodParamToolStripMenuItem, addClassRelationshipMenuItem, toolStripSeparator1, MoveItemUpMenuItem, toolStripSeparator2, LocalCopyMenuItem, LocalPasteMenuItem, toolStripSeparator3, removeSelectedItemToolStripMenuItem });
       contextMenuStrip1.Name = "contextMenuStrip1";
-      contextMenuStrip1.Size = new Size(244, 358);
+      contextMenuStrip1.Size = new Size(244, 382);
       contextMenuStrip1.Opening += contextMenuStrip1_Opening;
       // 
       // newDiagramToolStripMenuItem
@@ -332,6 +335,13 @@
       addMethodParamToolStripMenuItem.Text = "Add Method Param";
       addMethodParamToolStripMenuItem.Click += addMethodParamToolStripMenuItem_Click;
       // 
+      // addClassRelationshipMenuItem
+      // 
+      addClassRelationshipMenuItem.Name = "addClassRelationshipMenuItem";
+      addClassRelationshipMenuItem.Size = new Size(243, 24);
+      addClassRelationshipMenuItem.Text = "Add Class Relationship";
+      addClassRelationshipMenuItem.Click += addClassRelationshipMenuItem_Click;
+      // 
       // toolStripSeparator1
       // 
       toolStripSeparator1.Name = "toolStripSeparator1";
@@ -384,19 +394,6 @@
       imageList2.Images.SetKeyName(1, "Fatcow-Farm-Fresh-Blueprint.32.png");
       imageList2.Images.SetKeyName(2, "Fatcow-Farm-Fresh-Borders-accent.32.png");
       imageList2.Images.SetKeyName(3, "separator-label-icon.png");
-      // 
-      // btnRefresh
-      // 
-      btnRefresh.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-      btnRefresh.ImageAlign = ContentAlignment.MiddleLeft;
-      btnRefresh.ImageIndex = 0;
-      btnRefresh.ImageList = imageList1;
-      btnRefresh.Location = new Point(329, 5);
-      btnRefresh.Name = "btnRefresh";
-      btnRefresh.Size = new Size(24, 28);
-      btnRefresh.TabIndex = 14;
-      btnRefresh.UseVisualStyleBackColor = true;
-      btnRefresh.Click += btnRefresh_Click;
       // 
       // lbLine2
       // 
@@ -487,28 +484,24 @@
       // btnCancel
       // 
       btnCancel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-      btnCancel.ImageAlign = ContentAlignment.MiddleLeft;
       btnCancel.ImageIndex = 3;
       btnCancel.ImageList = imageList1;
-      btnCancel.Location = new Point(242, 5);
+      btnCancel.Location = new Point(321, 5);
       btnCancel.Name = "btnCancel";
-      btnCancel.Size = new Size(87, 28);
+      btnCancel.Size = new Size(33, 28);
       btnCancel.TabIndex = 3;
-      btnCancel.Text = "Cancel";
       btnCancel.UseVisualStyleBackColor = true;
       btnCancel.Click += btnCancel_Click;
       // 
       // btnSave
       // 
       btnSave.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-      btnSave.ImageAlign = ContentAlignment.MiddleLeft;
       btnSave.ImageIndex = 4;
       btnSave.ImageList = imageList1;
-      btnSave.Location = new Point(159, 5);
+      btnSave.Location = new Point(290, 5);
       btnSave.Name = "btnSave";
-      btnSave.Size = new Size(84, 28);
+      btnSave.Size = new Size(30, 28);
       btnSave.TabIndex = 2;
-      btnSave.Text = "Save";
       btnSave.TextAlign = ContentAlignment.TopCenter;
       btnSave.UseVisualStyleBackColor = true;
       btnSave.Click += btnSave_Click;
@@ -540,25 +533,50 @@
       edLine2.TabIndex = 12;
       edLine2.TextChanged += edLine2_TextChanged;
       // 
+      // cbShowMermaidScript
+      // 
+      cbShowMermaidScript.Appearance = Appearance.Button;
+      cbShowMermaidScript.AutoSize = true;
+      cbShowMermaidScript.Location = new Point(29, 4);
+      cbShowMermaidScript.Name = "cbShowMermaidScript";
+      cbShowMermaidScript.Size = new Size(79, 30);
+      cbShowMermaidScript.TabIndex = 17;
+      cbShowMermaidScript.Text = "Mermaid";
+      cbShowMermaidScript.UseVisualStyleBackColor = true;
+      cbShowMermaidScript.CheckedChanged += cbShowMermaidScript_CheckedChanged;
+      // 
+      // btnRefresh
+      // 
+      btnRefresh.ImageAlign = ContentAlignment.MiddleLeft;
+      btnRefresh.ImageIndex = 0;
+      btnRefresh.ImageList = imageList1;
+      btnRefresh.Location = new Point(3, 4);
+      btnRefresh.Name = "btnRefresh";
+      btnRefresh.Size = new Size(24, 30);
+      btnRefresh.TabIndex = 16;
+      btnRefresh.UseVisualStyleBackColor = true;
+      btnRefresh.Click += btnRefresh_Click;
+      // 
       // wbOut
       // 
       wbOut.AllowExternalDrop = true;
       wbOut.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
       wbOut.CreationProperties = null;
       wbOut.DefaultBackgroundColor = Color.White;
-      wbOut.Location = new Point(24, 17);
+      wbOut.Location = new Point(3, 36);
       wbOut.Name = "wbOut";
-      wbOut.Size = new Size(689, 641);
+      wbOut.Size = new Size(716, 658);
       wbOut.TabIndex = 1;
       wbOut.ZoomFactor = 1D;
       // 
       // edLogMsg
       // 
       edLogMsg.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-      edLogMsg.Location = new Point(24, 690);
+      edLogMsg.Location = new Point(3, 704);
       edLogMsg.Multiline = true;
       edLogMsg.Name = "edLogMsg";
-      edLogMsg.Size = new Size(689, 122);
+      edLogMsg.ScrollBars = ScrollBars.Vertical;
+      edLogMsg.Size = new Size(716, 122);
       edLogMsg.TabIndex = 0;
       // 
       // odMain
@@ -646,9 +664,11 @@
     private ToolStripMenuItem newClassDiagramMenuItem;
     private ToolStripMenuItem addNameSpaceToolStripMenuItem;
     private ToolStripMenuItem addClassToolStripMenuItem;
-    private Button btnRefresh;
     private ToolStripMenuItem addClassPropertyToolStripMenuItem;
     private ToolStripMenuItem addClassMethToolStripMenuItem;
     private ToolStripMenuItem addMethodParamToolStripMenuItem;
+    private ToolStripMenuItem addClassRelationshipMenuItem;
+    private Button btnRefresh;
+    private CheckBox cbShowMermaidScript;
   }
 }

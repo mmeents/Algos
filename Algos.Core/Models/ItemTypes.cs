@@ -50,6 +50,7 @@ namespace Algos.Core.Models
     public ItemType CdMethod { get; set; }
     public ItemType CdParameters { get; set; }
     public ItemType CdRelationship { get; set; }
+    public ItemType ClassDiagramCardinality { get; set; }
 
     #endregion
 
@@ -256,6 +257,16 @@ namespace Algos.Core.Models
         ClassDiagramDirectionLeftToRight.ClassDiagramDirection = FoggyBalrog.MermaidDotNet.ClassDiagram.Model.ClassDiagramDirection.LeftToRight;
         var ClassDiagramDirectionRightToLeft = AddVisibleChildType(ClassDiagramDirection, "RightToLeft", "Flow chart orientation RightToLeft");
         ClassDiagramDirectionRightToLeft.ClassDiagramDirection = FoggyBalrog.MermaidDotNet.ClassDiagram.Model.ClassDiagramDirection.RightToLeft;
+       
+       ClassDiagramCardinality = AddRootType("ClassDiagramCardinality", "Class Diagram Cardinality types");
+        var ClassDiagramCardinalityOne = AddVisibleChildType(ClassDiagramCardinality, "One", "Class Diagram Cardinality One");
+        ClassDiagramCardinalityOne.ClassDiagramCardinality = FoggyBalrog.MermaidDotNet.ClassDiagram.Model.Cardinality.One;
+        var ClassDiagramCardinalityMany = AddVisibleChildType(ClassDiagramCardinality, "Any", "Class Diagram Cardinality Any");
+        ClassDiagramCardinalityMany.ClassDiagramCardinality = FoggyBalrog.MermaidDotNet.ClassDiagram.Model.Cardinality.Any;
+        var ClassDiagramCardinalityZeroOrOne = AddVisibleChildType(ClassDiagramCardinality, "ZeroOrOne", "Class Diagram Cardinality ZeroOrOne");
+        ClassDiagramCardinalityZeroOrOne.ClassDiagramCardinality = FoggyBalrog.MermaidDotNet.ClassDiagram.Model.Cardinality.ZeroOrOne;
+        var ClassDiagramCardinalityZeroOrMany = AddVisibleChildType(ClassDiagramCardinality, "ZeroOrMore", "Class Diagram Cardinality ZeroOrMore");
+        ClassDiagramCardinalityZeroOrMany.ClassDiagramCardinality = FoggyBalrog.MermaidDotNet.ClassDiagram.Model.Cardinality.ZeroOrMore;
 
 
 
@@ -359,6 +370,21 @@ namespace Algos.Core.Models
           _diagramTypes = GetDiagramTypes();
         }
         return _diagramTypes;
+      }
+    }
+
+    private HashSet<int> _classTypes;
+    public HashSet<int> ClassTypes {
+      get {
+        if (_classTypes == null) {
+          _classTypes = new();
+          _classTypes.Add(ClassDiagram.Id);          
+          _classTypes.Add(CdClass.Id);
+          _classTypes.Add(CdProperty.Id);
+          _classTypes.Add(CdMethod.Id);
+          _classTypes.Add(CdParameters.Id);
+        }         
+        return _classTypes;
       }
     }
     #endregion

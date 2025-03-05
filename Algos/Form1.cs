@@ -15,6 +15,10 @@ using System;
 using FoggyBalrog.MermaidDotNet.ClassDiagram.Model;
 using FoggyBalrog.MermaidDotNet.ClassDiagram;
 using System.Data;
+using FoggyBalrog.MermaidDotNet.EntityRelationshipDiagram.Model;
+using FoggyBalrog.MermaidDotNet.RequirementDiagram.Model;
+using System.Reflection.Metadata;
+using System.IO.Packaging;
 
 namespace Algos
 {
@@ -253,7 +257,7 @@ namespace Algos
           if (edName.BackColor != Color.LightYellow) edName.BackColor = Color.LightYellow;
           if (cbShape.BackColor != Color.LightYellow) cbShape.BackColor = Color.LightYellow;
           if (cbEdit2.BackColor != Color.LightYellow) cbEdit2.BackColor = Color.LightYellow;
-          if (cbEdit3.BackColor != Color.LightYellow) cbEdit3.BackColor = Color.LightYellow;          
+          if (cbEdit3.BackColor != Color.LightYellow) cbEdit3.BackColor = Color.LightYellow;
           if (edLine2.BackColor != Color.LightYellow) edLine2.BackColor = Color.LightYellow;
         } else {
           if (btnSave.Visible) btnSave.Visible = false;
@@ -261,7 +265,7 @@ namespace Algos
           if (edName.BackColor != Color.White) edName.BackColor = Color.White;
           if (cbShape.BackColor != Color.White) cbShape.BackColor = Color.White;
           if (cbEdit2.BackColor != Color.White) cbEdit2.BackColor = Color.White;
-          if (cbEdit3.BackColor != Color.White) cbEdit3.BackColor = Color.White;          
+          if (cbEdit3.BackColor != Color.White) cbEdit3.BackColor = Color.White;
           if (edLine2.BackColor != Color.White) edLine2.BackColor = Color.White;
         }
       }
@@ -283,6 +287,7 @@ namespace Algos
         addClassPropertyToolStripMenuItem.Visible = false;
         addClassMethToolStripMenuItem.Visible = false;
         addMethodParamToolStripMenuItem.Visible = false;
+        addClassRelationshipMenuItem.Visible = false;
       } else {
         var diagramNode = _itemService.GetDiagramNode(_inEditItem);
         if (diagramNode.ItemTypeId == _types.MindMapDiagram.Id) {
@@ -296,6 +301,7 @@ namespace Algos
           addClassPropertyToolStripMenuItem.Visible = false;
           addClassMethToolStripMenuItem.Visible = false;
           addMethodParamToolStripMenuItem.Visible = false;
+          addClassRelationshipMenuItem.Visible = false;
         } else if (diagramNode.ItemTypeId == _types.FlowChartDiagram.Id) {
 
           if (_inEditItem.ItemTypeId == _types.FlowChartDiagram.Id) {
@@ -324,6 +330,7 @@ namespace Algos
           addClassPropertyToolStripMenuItem.Visible = false;
           addClassMethToolStripMenuItem.Visible = false;
           addMethodParamToolStripMenuItem.Visible = false;
+          addClassRelationshipMenuItem.Visible = false;
 
         } else if (diagramNode.ItemTypeId == _types.ClassDiagram.Id) {
           if (_inEditItem.ItemTypeId == _types.ClassDiagram.Id) {
@@ -332,30 +339,35 @@ namespace Algos
             addClassPropertyToolStripMenuItem.Visible = false;
             addClassMethToolStripMenuItem.Visible = false;
             addMethodParamToolStripMenuItem.Visible = false;
-          } else  if (_inEditItem.ItemTypeId == _types.CdNamespace.Id) {
+            addClassRelationshipMenuItem.Visible = false;
+          } else if (_inEditItem.ItemTypeId == _types.CdNamespace.Id) {
             addNameSpaceToolStripMenuItem.Visible = false;
             addClassToolStripMenuItem.Visible = true;
             addClassPropertyToolStripMenuItem.Visible = false;
             addClassMethToolStripMenuItem.Visible = false;
             addMethodParamToolStripMenuItem.Visible = false;
+            addClassRelationshipMenuItem.Visible = false;
           } else if (_inEditItem.ItemTypeId == _types.CdClass.Id) {
             addNameSpaceToolStripMenuItem.Visible = false;
             addClassToolStripMenuItem.Visible = false;
             addClassPropertyToolStripMenuItem.Visible = true;
             addClassMethToolStripMenuItem.Visible = true;
             addMethodParamToolStripMenuItem.Visible = false;
+            addClassRelationshipMenuItem.Visible = true;
           } else if (_inEditItem.ItemTypeId == _types.CdMethod.Id) {
             addNameSpaceToolStripMenuItem.Visible = false;
             addClassToolStripMenuItem.Visible = false;
             addClassPropertyToolStripMenuItem.Visible = false;
             addClassMethToolStripMenuItem.Visible = false;
             addMethodParamToolStripMenuItem.Visible = true;
+            addClassRelationshipMenuItem.Visible = false;
           } else {
             addNameSpaceToolStripMenuItem.Visible = false;
             addClassToolStripMenuItem.Visible = false;
             addClassPropertyToolStripMenuItem.Visible = false;
             addClassMethToolStripMenuItem.Visible = false;
             addMethodParamToolStripMenuItem.Visible = false;
+            addClassRelationshipMenuItem.Visible = false;
           }
           addFlowchartNodeMenuItem.Visible = false;
           addFlowchartLinkMenuItem.Visible = false;
@@ -373,6 +385,7 @@ namespace Algos
           addClassPropertyToolStripMenuItem.Visible = false;
           addClassMethToolStripMenuItem.Visible = false;
           addMethodParamToolStripMenuItem.Visible = false;
+          addClassRelationshipMenuItem.Visible = false;
         }
         removeSelectedItemToolStripMenuItem.Visible = true;
         LocalCopyMenuItem.Visible = true;
@@ -382,8 +395,35 @@ namespace Algos
       } else {
         var copiedDiagram = _itemService.GetDiagramNode(_copiedItem);
         var targetDiagram = _itemService.GetDiagramNode(_inEditItem);
-        LocalPasteMenuItem.Visible = (copiedDiagram?.ItemTypeId == targetDiagram?.ItemTypeId) &&
-          _inEditItem.ItemTypeId != _types.FlowChartLink.Id;
+        if (copiedDiagram?.ItemTypeId == targetDiagram?.ItemTypeId) {          
+                    
+          if (_inEditItem.ItemTypeId == _types.MindMapDiagram.Id
+            || _inEditItem.ItemTypeId == _types.MindMapNodes.Id
+          ) {
+            LocalPasteMenuItem.Visible = true;
+          } else if (_inEditItem.ItemTypeId == _types.FlowChartDiagram.Id
+              || _inEditItem.ItemTypeId == _types.FlowChartNode.Id
+              || _inEditItem.ItemTypeId == _types.FlowChartSubGraph.Id
+            ) {
+            LocalPasteMenuItem.Visible = true;
+          } else if ((_inEditItem.ItemTypeId == _types.CdNamespace.Id
+            || _inEditItem.ItemTypeId == _types.CdClass.Id)
+            && (_copiedItem.ItemTypeId == _types.CdClass.Id)) {
+            LocalPasteMenuItem.Visible = true;
+          } else if ((_inEditItem.ItemTypeId == _types.CdClass.Id)
+            && (_copiedItem.ItemTypeId == _types.CdProperty.Id
+              || _copiedItem.ItemTypeId == _types.CdMethod.Id)) {
+            LocalPasteMenuItem.Visible = true;
+          } else if ((_inEditItem.ItemTypeId == _types.CdMethod.Id)
+            && (_copiedItem.ItemTypeId == _types.CdParameters.Id)) {
+            LocalPasteMenuItem.Visible = true;
+          } else {
+            LocalPasteMenuItem.Visible = false;
+          }
+
+
+        }
+        
       }
     }
 
@@ -417,7 +457,7 @@ namespace Algos
     }
     private void addFlowchartSubGraphToolStripMenuItem_Click(object sender, EventArgs e) {
       if (_inEditItem != null &&
-        (_inEditItem.ItemTypeId == _types.FlowChartNode.Id || _inEditItem.ItemTypeId == _types.FlowChartLink.Id || _inEditItem.ItemTypeId == _types.FlowChartSubGraph.Id)) {
+        (_inEditItem.ItemTypeId == _types.FlowChartNode.Id || _inEditItem.ItemTypeId == _types.FlowChartDiagram.Id || _inEditItem.ItemTypeId == _types.FlowChartSubGraph.Id)) {
         var newFlowChartLink = _itemService.SaveNewChildItemsFromText(_inEditItem, _types.FlowChartSubGraph, "sub");
       }
     }
@@ -427,16 +467,12 @@ namespace Algos
       var nextDiagramNumber = _itemService.GetDiagramCount() + 1;
       var newClassDiagram = _itemService.SaveNewChildItemsFromText(null, _types.ClassDiagram, $"ClassDiagram{nextDiagramNumber}");
     }
-
     private void addNameSpaceToolStripMenuItem_Click(object sender, EventArgs e) {
       if (_inEditItem != null &&
-        (_inEditItem.ItemTypeId == _types.ClassDiagram.Id
-        || _inEditItem.ItemTypeId == _types.CdNamespace.Id
-      )) {
+        (_inEditItem.ItemTypeId == _types.ClassDiagram.Id )) {
         var newFlowChartNode = _itemService.SaveNewChildItemsFromText(_inEditItem, _types.CdNamespace, "SpaceA");
       }
     }
-
     private void addClassToolStripMenuItem_Click(object sender, EventArgs e) {
       if (_inEditItem != null &&
         (_inEditItem.ItemTypeId == _types.ClassDiagram.Id
@@ -448,13 +484,12 @@ namespace Algos
     }
     private void addClassPropertyToolStripMenuItem_Click(object sender, EventArgs e) {
       if (_inEditItem != null &&
-        ( _inEditItem.ItemTypeId == _types.CdClass.Id
+        (_inEditItem.ItemTypeId == _types.CdClass.Id
       )) {
         var newClass = _itemService.SaveNewChildItemsFromText(_inEditItem, _types.CdProperty, "PropA");
         newClass.Title = "string";
       }
     }
-
     private void addClassMethToolStripMenuItem_Click(object sender, EventArgs e) {
       if (_inEditItem != null &&
         (_inEditItem.ItemTypeId == _types.CdClass.Id
@@ -463,7 +498,6 @@ namespace Algos
         newMeth.Title = "string";
       }
     }
-
     private void addMethodParamToolStripMenuItem_Click(object sender, EventArgs e) {
       if (_inEditItem != null &&
         (_inEditItem.ItemTypeId == _types.CdMethod.Id
@@ -471,8 +505,15 @@ namespace Algos
         var newMeth = _itemService.SaveNewChildItemsFromText(_inEditItem, _types.CdParameters, "ParamA");
         newMeth.Title = "string";
       }
-    }    
-
+    }
+    private void addClassRelationshipMenuItem_Click(object sender, EventArgs e) {
+      if (_inEditItem != null &&
+        (_inEditItem.ItemTypeId == _types.CdClass.Id
+      )) {
+        var newR = _itemService.SaveNewChildItemsFromText(_inEditItem, _types.CdRelationship, "Relation");
+        newR.Title = "string";
+      }
+    }
     private void MoveItemUpMenuItem_Click(object sender, EventArgs e) {
       if (_inEditItem == null) return;
       if (!_inEditItem.CanSwitchUp()) return;
@@ -498,14 +539,12 @@ namespace Algos
       _itemService.UpdateItem(otherItem, true);
 
     }
-
     private void LocalCopyMenuItem_Click(object sender, EventArgs e) {
       if (treeView1.SelectedNode is Item selectedItem) {
         _copiedItem = selectedItem;
         LogMsg($"Item '{selectedItem.Name}' copied.");
       }
     }
-
     private void LocalPasteMenuItem_Click(object sender, EventArgs e) {
       if (_copiedItem != null && treeView1.SelectedNode is Item selectedItem) {
         try {
@@ -589,6 +628,7 @@ namespace Algos
           Item dragNode = (Item)e.Data.GetData(typeof(Item));
           if (dragNode != null) {
             var fnn = _itemService.MoveItemSave(targetItem, dragNode);
+            PopulateDisplays();
           }
         }
       } catch (Exception edd) {
@@ -622,15 +662,13 @@ namespace Algos
                     || targetNode.ItemTypeId == _types.FlowChartSubGraph.Id
                   ) {
                   e.Effect = DragDropEffects.Move;
-                } else if ((targetNode.ItemTypeId == _types.CdNamespace.Id)
-                  && (selectedItem.ItemTypeId == _types.CdNamespace.Id)) {
-                  e.Effect = DragDropEffects.Move;
                 } else if ((targetNode.ItemTypeId == _types.CdNamespace.Id
                   || targetNode.ItemTypeId == _types.CdClass.Id)
                   && (selectedItem.ItemTypeId == _types.CdClass.Id)) {
                   e.Effect = DragDropEffects.Move;
                 } else if ((targetNode.ItemTypeId == _types.CdClass.Id)
-                  && (selectedItem.ItemTypeId == _types.CdProperty.Id || selectedItem.ItemTypeId == _types.CdMethod.Id)) {
+                  && (selectedItem.ItemTypeId == _types.CdProperty.Id 
+                    || selectedItem.ItemTypeId == _types.CdMethod.Id)) {
                   e.Effect = DragDropEffects.Move;
                 } else if ((targetNode.ItemTypeId == _types.CdMethod.Id)
                   && (selectedItem.ItemTypeId == _types.CdParameters.Id)) {
@@ -638,11 +676,9 @@ namespace Algos
                 } else {
                   e.Effect = DragDropEffects.None;
                 }
-
               } else {
                 e.Effect = DragDropEffects.None;
               }
-
             } else {
               e.Effect = DragDropEffects.None;
             }
@@ -784,6 +820,17 @@ namespace Algos
             if (lbEdit2.Visible) lbEdit2.Visible = false;
             if (lbEdit3.Visible) lbEdit3.Visible = false;
 
+          } else if (_inEditItem.ItemTypeId == _types.CdRelationship.Id) {
+            if (lbLine2.Visible) lbLine2.Visible = false;
+            if (edLine2.Visible) edLine2.Visible = false;
+
+            if (!cbExpandedShape.Visible) cbExpandedShape.Visible = true;
+            if (!lbShape.Visible) lbShape.Visible = true;
+            if (!cbShape.Visible) cbShape.Visible = true;
+            if (!lbEdit2.Visible) lbEdit2.Visible = true;
+            if (!cbEdit2.Visible) cbEdit2.Visible = true;
+            if (!lbEdit3.Visible) lbEdit3.Visible = true;
+            if (!cbEdit3.Visible) cbEdit3.Visible = true;
           } else {
             if (cbExpandedShape.Visible) cbExpandedShape.Visible = false;
             if (cbShape.Visible) cbShape.Visible = false;
@@ -891,7 +938,7 @@ namespace Algos
             if (_inEditItem.ItemTypeId == _types.ClassDiagram.Id) {
               edLine2.Text = _inEditItem.Title;
               ConfigureComboBoxTypes(cbShape, _inEditItem.OrientationId, _types.GetChildrenItemsNoDef(_types.ClassDiagramDirection.Id));
-            } else if (_inEditItem.ItemTypeId == _types.CdClass.Id) { 
+            } else if (_inEditItem.ItemTypeId == _types.CdClass.Id) {
               lbLine2.Text = "";
               edLine2.Text = _inEditItem.Title;
             } else if (_inEditItem.ItemTypeId == _types.CdProperty.Id) {
@@ -903,10 +950,20 @@ namespace Algos
             } else if (_inEditItem.ItemTypeId == _types.CdParameters.Id) {
               lbLine2.Text = "Type:";
               edLine2.Text = _inEditItem.Title;
+            } else if (_inEditItem.ItemTypeId == _types.CdRelationship.Id) {
+              cbExpandedShape.Text = "Solid Lines";
+              if (cbExpandedShape.Checked != _inEditItem.IsExpandedShape) {
+                cbExpandedShape.Checked = _inEditItem.IsExpandedShape;
+              }
+              lbShape.Text = "Type:";
+              ConfigureComboBoxItems(cbShape, _inEditItem.OrientationId, _itemService.GetClassDiagramClasses(diagramNode));
+
+              lbEdit2.Text = "From:";
+              ConfigureComboBoxTypes(cbEdit2, _inEditItem.LinkLineStyleId, _types.GetChildrenItemsNoDef(_types.ClassDiagramCardinality.Id));
+              lbEdit3.Text = "To:";
+              ConfigureComboBoxTypes(cbEdit3, _inEditItem.LinkEndingId, _types.GetChildrenItemsNoDef(_types.ClassDiagramCardinality.Id));
             }
-
           }
-
         } catch (Exception ex) {
           LogMsg(ex.Message);
         } finally {
@@ -977,6 +1034,8 @@ namespace Algos
           }
         } else if (_inEditItem.ItemTypeId == _types.FlowChartLink.Id && cbExpandedShape.Checked != _inEditItem.IsLinkMultidirectional) {
           InEdit = true;
+        } else if (_inEditItem.ItemTypeId == _types.CdRelationship.Id && cbExpandedShape.Checked != _inEditItem.IsExpandedShape) {
+          InEdit = true;
         }
       }
     }
@@ -1007,6 +1066,10 @@ namespace Algos
             if (cbShape.SelectedValue != null && _inEditItem.OrientationId != cbShape.SelectedValue.AsInt32()) {
               InEdit = true;
             }
+          } else if (_inEditItem.ItemTypeId == _types.CdRelationship.Id) {
+            if (cbShape.SelectedValue != null && _inEditItem.OrientationId != cbShape.SelectedValue.AsInt32()) {
+              InEdit = true;
+            }
           }
         }
       }
@@ -1026,6 +1089,10 @@ namespace Algos
             if (cbShape.SelectedValue != null && _inEditItem.OrientationId != cbShape.SelectedValue.AsInt32()) {
               InEdit = true;
             }
+          } else if (_inEditItem.ItemTypeId == _types.CdRelationship.Id) {
+            if (cbEdit2.SelectedValue != null && _inEditItem.LinkEndingId != cbEdit2.SelectedValue.AsInt32()) {
+              InEdit = true;
+            }
           }
         }
       }
@@ -1036,6 +1103,12 @@ namespace Algos
         var diagramNode = _itemService.GetDiagramNode(_inEditItem);
         if (diagramNode.ItemTypeId == _types.FlowChartDiagram.Id) {
           if (_inEditItem.ItemTypeId == _types.FlowChartLink.Id) {
+            if (cbEdit3.SelectedValue != null && _inEditItem.LinkEndingId != cbEdit3.SelectedValue.AsInt32()) {
+              InEdit = true;
+            }
+          }
+        } else if (diagramNode.ItemTypeId == _types.ClassDiagram.Id) {
+          if (_inEditItem.ItemTypeId == _types.CdRelationship.Id) {
             if (cbEdit3.SelectedValue != null && _inEditItem.LinkEndingId != cbEdit3.SelectedValue.AsInt32()) {
               InEdit = true;
             }
@@ -1100,6 +1173,17 @@ namespace Algos
             _inEditItem.Title = edLine2.Text;
           } else if (_inEditItem.ItemTypeId == _types.CdParameters.Id) {
             _inEditItem.Title = edLine2.Text;
+          } else if (_inEditItem.ItemTypeId == _types.CdRelationship.Id) {
+            if (cbShape.SelectedValue != null && _inEditItem.OrientationId != cbShape.SelectedValue.AsInt32()) {
+              _inEditItem.OrientationId = cbShape.SelectedValue.AsInt32();
+            }
+            if (cbEdit2.SelectedValue != null && _inEditItem.LinkLineStyleId != cbEdit2.SelectedValue.AsInt32()) {
+              _inEditItem.LinkLineStyleId = cbEdit2.SelectedValue.AsInt32();
+            }
+            if (cbEdit3.SelectedValue != null && _inEditItem.LinkEndingId != cbEdit3.SelectedValue.AsInt32()) {
+              _inEditItem.LinkEndingId = cbEdit3.SelectedValue.AsInt32();
+            }
+            _inEditItem.IsExpandedShape = cbExpandedShape.Checked;
           }
 
         }
@@ -1113,23 +1197,129 @@ namespace Algos
     private void btnRefresh_Click(object sender, EventArgs e) {
       PopulateDisplays();
     }
-
+    private void cbShowMermaidScript_CheckedChanged(object sender, EventArgs e) {
+      PopulateDisplays();
+    }
     #endregion       
 
     #region Mermaid Diagram code generation and display
     private void PopulateDisplays() {
       if (_inEditItem != null) {
-        wbOut.CoreWebView2.NavigateToString(GetMermaidForm(_inEditItem));
+        wbOut.CoreWebView2.NavigateToString(GetMermaidHtmlForm(_inEditItem));
       } else {
         wbOut.CoreWebView2.NavigateToString("Open a file and select something in the tree.");
       }
-
     }
 
+    private string GetMermaidHtmlForm(Item it) {
+      StringBuilder sb = new StringBuilder();
+      var mermaidScript = "";
+
+      var errorMsg = "";
+      try {
+        mermaidScript = PrepareDiagramScript(it);
+      } catch (Exception e0) {
+        errorMsg = e0.Message;
+      }
+
+
+      sb.AppendLine("<!DOCTYPE html>\r\n<html lang=\"en\">");
+      sb.AppendLine("<head>\r\n  <meta charset=\"UTF-8\"/>");
+      sb.AppendLine($"<title>Algos Display</title>");
+      sb.AppendLine("<script type=\"module\">");
+      sb.AppendLine("  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';");
+      sb.AppendLine("  mermaid.initialize({ startOnLoad: true, securityLevel: 'loose', theme: 'base' });");
+      sb.AppendLine("  document.addEventListener(\"DOMContentLoaded\", () => { mermaid.init(undefined, document.querySelectorAll(\".mermaid\")); });");
+      sb.AppendLine("</script>");
+      sb.AppendLine("<script src=\"https://cdn.jsdelivr.net/npm/@panzoom/panzoom/dist/panzoom.min.js\"></script>\r\n");
+      sb.AppendLine("<style>");
+      sb.AppendLine("  body { ");
+      sb.AppendLine("    font-family: 'Segoe UI', Arial, sans-serif; ");
+      sb.AppendLine("    font-size: 12.2pt; ");
+      sb.AppendLine("    margin: 0; ");
+      sb.AppendLine("    padding: 0; ");
+      sb.AppendLine("    display: flex; ");              // Enable flex layout
+      sb.AppendLine("    flex-direction: column; ");   // Stack elements vertically
+      sb.AppendLine("    height: 100vh; ");            // Full viewport height
+      sb.AppendLine("  }");
+      sb.AppendLine("  .mermaid-container { ");
+      sb.AppendLine("    display: flex; ");
+      sb.AppendLine("    justify-content: center; ");
+      sb.AppendLine("    align-items: center; ");
+      sb.AppendLine("    flex: 1; ");                 // Take up all available space
+      sb.AppendLine("    width: 100%; ");
+      sb.AppendLine("    overflow: auto; ");          // Add scrollbars if needed
+      sb.AppendLine("  }");
+      sb.AppendLine("  .copy-container { ");
+      sb.AppendLine("    display: flex; ");
+      sb.AppendLine("    justify-content: center; ");
+      sb.AppendLine("    padding: 10px; ");
+      sb.AppendLine("    background: #f0f0f0; ");    // Add a background to separate
+      sb.AppendLine("    border-top: 1px solid #ccc; "); // Add a border for clarity
+      sb.AppendLine("  }");
+      sb.AppendLine("  textarea { width: 80%; height: 100px; }");
+      sb.AppendLine("  button { margin-left: 10px; padding: 5px 10px; }");
+      sb.AppendLine("</style>");
+      sb.AppendLine("<script>");
+      sb.AppendLine("  function copyToClipboard() {");
+      sb.AppendLine("    var copyText = document.getElementById('mermaidScript');");
+      sb.AppendLine("    copyText.select();");
+      sb.AppendLine("    copyText.setSelectionRange(0, 99999);");
+      sb.AppendLine("    document.execCommand('copy');");
+      sb.AppendLine("  }");
+      sb.AppendLine("</script>");
+      sb.AppendLine("</head>");
+      sb.AppendLine("<body>");
+      if (errorMsg.Length > 0) {
+        sb.AppendLine($"<h1>Error Building Mermaid Script: {errorMsg}</h1>");
+      } else {
+
+        sb.AppendLine("  <div class=\"mermaid-container\">\r\n");
+        sb.AppendLine($"    <pre class=\"mermaid\">{mermaidScript}");
+        sb.AppendLine("    </pre></div>");
+
+        if (cbShowMermaidScript.Checked) {
+          sb.AppendLine("  <div class=\"copy-container\">");
+          sb.AppendLine("    <textarea id=\"mermaidScript\" readonly>");
+          sb.AppendLine(mermaidScript);
+          sb.AppendLine("    </textarea>");
+          sb.AppendLine("    <button onclick=\"copyToClipboard()\">Copy Script</button>");
+          sb.AppendLine("  </div>");
+        }
+      }
+      sb.AppendLine("<script>");
+      sb.AppendLine("  const diagram = document.querySelector('.mermaid');");
+      sb.AppendLine("  const panzoom = Panzoom(diagram, { maxScale: 5 });");     
+      sb.AppendLine("  diagram.addEventListener('wheel', (event) => {");
+      sb.AppendLine("    event.preventDefault();");
+      sb.AppendLine("    const scaleFactor = event.deltaY < 0 ? 1.1 : 0.9;");
+      sb.AppendLine("    const currentScale = panzoom.getScale();");
+      sb.AppendLine("    panzoom.zoom(currentScale * scaleFactor, { animate:false });");          
+      sb.AppendLine("  });");
+      sb.AppendLine("</script>");
+      sb.AppendLine("</body>\r\n</html>");
+      return sb.ToString();
+    }
+
+    private string PrepareDiagramScript(Item it) {
+      StringBuilder sb = new();
+
+      var diagramNode = _itemService.GetDiagramNode(it);
+      if (diagramNode == null) {
+        throw new Exception("No diagram found?");
+      }
+      if (diagramNode.ItemTypeId == _types.MindMapDiagram.Id) {
+        return MakeMindmapDiagram(diagramNode);
+      } else if (diagramNode.ItemTypeId == _types.FlowChartDiagram.Id) {
+        return MakeFlowchartDiagram(diagramNode);
+      } else if (diagramNode.ItemTypeId == _types.ClassDiagram.Id) {
+        return MakeClassDiagram(diagramNode);
+      }
+      throw new Exception("Diagram type not yet supported");
+    }
+
+    #region MindMap Generation and display 
     private ConcurrentDictionary<int, FoggyBalrog.MermaidDotNet.MindMap.Model.Node> _mindmapNodes = new();
-    private ConcurrentDictionary<int, FoggyBalrog.MermaidDotNet.Flowchart.Model.Node> _flowchartNodes = new();
-    private ConcurrentDictionary<int, FoggyBalrog.MermaidDotNet.Flowchart.Model.Subgraph> _flowchartSubgraphs = new();
-    private ConcurrentDictionary<int, FoggyBalrog.MermaidDotNet.ClassDiagram.Model.Class> _classDiagramClasses = new();
     private MindMapBuilder AddNodeByItem(Item it, MindMapBuilder mindMapBuilder) {
 
       var aParent = _mindmapNodes.ContainsKey(it.OwnerId) ? _mindmapNodes[it.OwnerId] : null;
@@ -1162,7 +1352,10 @@ namespace Algos
       }
       return mindMapBuilder.Build();
     }
-
+    #endregion
+    #region Flowchart Generation and display
+    private ConcurrentDictionary<int, FoggyBalrog.MermaidDotNet.Flowchart.Model.Node> _flowchartNodes = new();
+    private ConcurrentDictionary<int, FoggyBalrog.MermaidDotNet.Flowchart.Model.Subgraph> _flowchartSubgraphs = new();
     private FlowchartBuilder AddFlowChartNodeByItem(Item it, FlowchartBuilder flowChartBuilder) {
       try {
         var bIsMarkdown = it.IsMarkdown;
@@ -1269,42 +1462,27 @@ namespace Algos
       }
       return flowchartBuilder.Build();
     }
+    #endregion
+    #region Class Diagram Generation and display
 
-    private void AddClassDiargramClass(Item it, ClassDiagramBuilder bldr) {
+    private ConcurrentDictionary<int, FoggyBalrog.MermaidDotNet.ClassDiagram.Model.Class> _classDiagramClasses = new();
 
-      if (it.ItemTypeId == _types.CdClass.Id) {
-        var aName = it.Name;
-        var aTitle = it.Name;
-        var aDirection = _types[it.OrientationId].ClassDiagramDirection;
-        bldr.AddClass(aName, out var aClass, aTitle);
-        _classDiagramClasses[it.Id] = aClass;
-        foreach (var child in it.Nodes) {
-          var aNode = (Item)child;
-          if (aNode.ItemTypeId == _types.CdProperty.Id) {
-            var aPropName = aNode.Name;
-            var aPropType = aNode.Title;
-            bldr.AddProperty(aClass, aPropType, aPropName);
-          } else if (aNode.ItemTypeId == _types.CdMethod.Id) {
-            var aMethodName = aNode.Name;            
-            var aReturnType = aNode.Title;
-            var aVisability = Visibilities.None;
-            var aParameters = new List<Param2>();
-            foreach (Item aParam in aNode.Nodes) {
-              if (aParam.ItemTypeId == _types.CdParameters.Id) {
-                var aParamName = aParam.Name;
-                var aParamType = aParam.Title;
-                aParameters.Add(new Param2(aParamName, aParamType));
-              }
-            }
-
-            bldr.AddMethod(aClass, aReturnType, aMethodName, aVisability, aParameters.Select(p => (p.ParamType, p.Name)).ToArray());
-          }
+    private string MakeClassDiagram(Item diagram) {
+      _classDiagramClasses.Clear();
+      var aTitle = diagram.Name;
+      var aDirection = _types[diagram.OrientationId].ClassDiagramDirection;
+      var ClassDiagramBuilder = Mermaid.ClassDiagram(aTitle, null, aDirection);
+      foreach (var child in diagram.Nodes) {
+        var aNode = (Item)child;
+        if (aNode.ItemTypeId == _types.CdNamespace.Id) {
+          RecursivlyAddNamespaces(aNode, ClassDiagramBuilder);
+        } else if (aNode.ItemTypeId == _types.CdClass.Id) {
+          AddClassDiargramClass(aNode, ClassDiagramBuilder);
         }
-
       }
-
-
+      return ClassDiagramBuilder.Build();
     }
+
     private ClassDiagramBuilder RecursivlyAddNamespaces(Item it, ClassDiagramBuilder bldr) {
 
       if (it.ItemTypeId == _types.CdNamespace.Id) {
@@ -1323,93 +1501,66 @@ namespace Algos
       return bldr;
     }
 
-    private string MakeClassDiagram(Item diagram) {
-      _classDiagramClasses.Clear();
-      var aTitle = diagram.Name;
-      var aDirection = _types[diagram.OrientationId].ClassDiagramDirection;
-      var ClassDiagramBuilder = Mermaid.ClassDiagram(aTitle, null, aDirection);
-      foreach (var child in diagram.Nodes) {
-        var aNode = (Item)child;
-        if (aNode.ItemTypeId == _types.CdNamespace.Id) {
-          RecursivlyAddNamespaces(aNode, ClassDiagramBuilder);
-        } else if (aNode.ItemTypeId == _types.CdClass.Id) {
-          AddClassDiargramClass(aNode, ClassDiagramBuilder);
+    private ClassDiagramBuilder RecursivlyAddReleationships(Item it, ClassDiagramBuilder bldr) {
+      if (it.ItemTypeId == _types.CdRelationship.Id) {
+        var FromClass = _classDiagramClasses.ContainsKey(it.OwnerId) ? _classDiagramClasses[it.OwnerId] : null;
+        var ToClass = _classDiagramClasses.ContainsKey(it.OrientationId) ? _classDiagramClasses[it.OrientationId] : null;
+        var fc = _types[it.LinkLineStyleId].ClassDiagramCardinality;
+        var tc = _types[it.LinkEndingId].ClassDiagramCardinality;
+        var FromReleationship = FoggyBalrog.MermaidDotNet.ClassDiagram.Model.RelationshipType.Unspecified;
+        var ToReleationship = FoggyBalrog.MermaidDotNet.ClassDiagram.Model.RelationshipType.Unspecified;
+
+        var aLinkStyle = it.IsExpandedShape ? LinkStyle.Solid : LinkStyle.Dashed;
+        var aLable = it.Name;
+        if (FromClass == null || ToClass == null) return bldr;
+        bldr.AddRelationship(FromClass, ToClass, FromReleationship, fc, ToReleationship, tc, aLinkStyle, aLable);
+      }
+      foreach (var child in it.Nodes) {
+        RecursivlyAddReleationships((Item)child, bldr);
+      }
+      return bldr;
+    }
+
+    private void AddClassDiargramClass(Item it, ClassDiagramBuilder bldr) {
+
+      if (it.ItemTypeId == _types.CdClass.Id) {
+        var aName = it.Name;
+        var aTitle = it.Name;
+        var aDirection = _types[it.OrientationId].ClassDiagramDirection;
+        bldr.AddClass(aName, out var aClass, aTitle);
+        _classDiagramClasses[it.Id] = aClass;
+        foreach (var child in it.Nodes) {
+          var aNode = (Item)child;
+          if (aNode.ItemTypeId == _types.CdProperty.Id) {
+            var aPropName = aNode.Name;
+            var aPropType = aNode.Title;
+            bldr.AddProperty(aClass, aPropType, aPropName);
+          } else if (aNode.ItemTypeId == _types.CdMethod.Id) {
+            var aMethodName = aNode.Name;
+            var aReturnType = aNode.Title;
+            var aVisability = Visibilities.None;
+            var aParameters = new List<Param2>();
+            foreach (Item aParam in aNode.Nodes) {
+              if (aParam.ItemTypeId == _types.CdParameters.Id) {
+                var aParamName = aParam.Name;
+                var aParamType = aParam.Title;
+                aParameters.Add(new Param2(aParamName, aParamType));
+              }
+            }
+
+            bldr.AddMethod(aClass, aReturnType, aMethodName, aVisability, aParameters.Select(p => (p.ParamType, p.Name)).ToArray());
+          }
         }
+
       }
-      return ClassDiagramBuilder.Build();
     }
 
-    private string PrepareDiagramScript(Item it) {
-      StringBuilder sb = new();
 
-      var diagramNode = _itemService.GetDiagramNode(it);
-      if (diagramNode == null) {
-        throw new Exception("No diagram found?");
-      }
-      if (diagramNode.ItemTypeId == _types.MindMapDiagram.Id) {
-        return MakeMindmapDiagram(diagramNode);
-      } else if (diagramNode.ItemTypeId == _types.FlowChartDiagram.Id) {
-        return MakeFlowchartDiagram(diagramNode);
-      } else if (diagramNode.ItemTypeId == _types.ClassDiagram.Id) {
-        return MakeClassDiagram(diagramNode);
-      }
-      throw new Exception("Diagram type not yet supported");
-    }
-
-    private string GetMermaidForm(Item it) {
-      StringBuilder sb = new StringBuilder();
-      var mermaidScript = "";
-
-      var errorMsg = "";
-      try {
-        mermaidScript = PrepareDiagramScript(it);
-      } catch (Exception e0) {
-        errorMsg = e0.Message;
-      }
-
-
-      sb.AppendLine("<!DOCTYPE html>\r\n<html lang=\"en\">");
-      sb.AppendLine("<head>\r\n  <meta charset=\"UTF-8\"/>");
-      sb.AppendLine($"<title>Algos Display</title>");
-      sb.AppendLine("<script type=\"module\">");
-      sb.AppendLine("  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';");
-      sb.AppendLine("  mermaid.initialize({ startOnLoad: true, securityLevel: 'loose', theme: 'base' });");
-      sb.AppendLine("  document.addEventListener(\"DOMContentLoaded\", () => { mermaid.init(undefined, document.querySelectorAll(\".mermaid\")); });");
-      sb.AppendLine("</script>");
-      sb.AppendLine("<style>");
-      sb.AppendLine("  body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 12.2pt; }");
-      sb.AppendLine("  .mermaid-container { display: flex; justify-content: center; }");
-      sb.AppendLine("  .copy-container { display: flex; justify-content: center; margin-top: 20px; }");
-      sb.AppendLine("  textarea { width: 80%; height: 100px; }");
-      sb.AppendLine("  button { margin-left: 10px; padding: 5px 10px; }");
-      sb.AppendLine("</style>");
-      sb.AppendLine("<script>");
-      sb.AppendLine("  function copyToClipboard() {");
-      sb.AppendLine("    var copyText = document.getElementById('mermaidScript');");
-      sb.AppendLine("    copyText.select();");
-      sb.AppendLine("    copyText.setSelectionRange(0, 99999);");
-      sb.AppendLine("    document.execCommand('copy');");
-      sb.AppendLine("  }");
-      sb.AppendLine("</script>");
-      sb.AppendLine("</head>");
-      sb.AppendLine("<body>");
-      if (errorMsg.Length > 0) {
-        sb.AppendLine($"<h1>Error Building Mermaid Script: {errorMsg}</h1>");
-      } else {
-        sb.AppendLine("  <div class=\"mermaid-container\">\r\n");
-        sb.AppendLine($"    <pre class=\"mermaid\">{mermaidScript}");
-        sb.AppendLine("    </pre></div>");
-        sb.AppendLine("  <div class=\"copy-container\">");
-        sb.AppendLine("    <textarea id=\"mermaidScript\" readonly>");
-        sb.AppendLine(mermaidScript);
-        sb.AppendLine("    </textarea>");
-        sb.AppendLine("    <button onclick=\"copyToClipboard()\">Copy Script</button>");
-        sb.AppendLine("  </div>");
-      }
-      sb.AppendLine("</body>\r\n</html>");
-      return sb.ToString();
-    }
     #endregion
+
+    #endregion
+
+
 
 
 

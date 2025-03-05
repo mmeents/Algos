@@ -80,7 +80,7 @@ namespace Algos.Core
       List<Item> result = new();
       if (flowchartNode == null) return result;
       result.Add(flowchartNode);
-      var childrenNodes = _items.GetChildrenItems(flowchartNode.Id).Where(x => x.ItemTypeId == _types.FlowChartNode.Id );
+      var childrenNodes = _items.GetChildrenItems(flowchartNode.Id).Where(x => x.ItemTypeId == _types.FlowChartNode.Id || x.ItemTypeId == _types.FlowChartSubGraph.Id);
       if (childrenNodes.Count() > 0) {
         foreach (Item item in childrenNodes) {          
           result.AddRange(GetChildrenFlowchartNodes(item));
@@ -91,9 +91,34 @@ namespace Algos.Core
     public IEnumerable<Item> GetFlowchartNodes(Item diagramNode) {
       List<Item> result = new();
       if (diagramNode != null) {
-        var childrenNodes = _items.GetChildrenItems(diagramNode.Id).Where(x => x.ItemTypeId == _types.FlowChartNode.Id);
+        var childrenNodes = _items.GetChildrenItems(diagramNode.Id).Where(x => x.ItemTypeId == _types.FlowChartNode.Id || x.ItemTypeId==_types.FlowChartSubGraph.Id);
         if (childrenNodes.Count() > 0) {
           foreach (Item item in childrenNodes) {            
+            result.AddRange(GetChildrenFlowchartNodes(item));
+          }
+        }
+      }
+      return result;
+    }
+
+    private IEnumerable<Item> GetChildrenClasses(Item classDiagramNode) {
+      List<Item> result = new();
+      if (classDiagramNode == null) return result;
+      if (classDiagramNode.ItemTypeId == _types.CdClass.Id) {
+        result.Add(classDiagramNode);
+      }      
+      var childrenNodes = classDiagramNode.Nodes;
+      foreach (Item item in childrenNodes) {
+        result.AddRange(GetChildrenClasses(item));
+      }      
+      return result;
+    }
+    public IEnumerable<Item> GetClassDiagramClasses(Item diagramNode) {
+      List<Item> result = new();
+      if (diagramNode != null) {
+        var childrenNodes = diagramNode.Nodes;
+        if (childrenNodes.Count > 0) {
+          foreach (Item item in childrenNodes) {
             result.AddRange(GetChildrenFlowchartNodes(item));
           }
         }
@@ -198,18 +223,11 @@ namespace Algos.Core
       return DragItem;
     }
 
-    #region Copy Item  
-    private bool IsDescendant(Item potentialDescendant, Item potentialAncestor) {
-      Item current = potentialDescendant;
-      while (current != null) {
-        if (current == potentialAncestor) {
-          return true;
-        }
-        current = current.Parent as Item;
-      }
-      return false;
-    }
+    
+    
+    #region CopyItemTo    
 
+    #region Copy MindMap
     private void RecursiveCopyItemTo(Item newOwnerItem, Item itemToCopy) {
       Item newItem = itemToCopy.AsClone();
       newItem.Id = _items.GetNextId();
@@ -221,7 +239,8 @@ namespace Algos.Core
         RecursiveCopyItemTo(newItem, child);
       }
     }
-
+    #endregion
+    #region Copy Flowchart 
     private void RecursiveCopyFlowchartNodeTo(Item newOwnerItem, Item itemToCopy) {
 
       Item innerNextItem = null;
@@ -275,6 +294,11 @@ namespace Algos.Core
         innerNextItem = itemToCopy.AsClone();
         innerNextItem.Id = _items.GetNextId();
         innerNextItem.OwnerId = newOwnerItem.Id;
+        if (copyNodeLookups.ContainsKey(itemToCopy.OrientationId)) {
+          innerNextItem.OrientationId = copyNodeLookups[itemToCopy.OrientationId];
+        } else {
+          innerNextItem.OrientationId = itemToCopy.OrientationId;
+        }
         innerNextItem.OrientationId = copyNodeLookups[ itemToCopy.OrientationId];
         _items[innerNextItem.Id] = innerNextItem;
         _itemFileTable.Insert(innerNextItem, false);
@@ -286,10 +310,79 @@ namespace Algos.Core
         RecursiveCopyFlowchartLinks(innerNextItem, child);
       }
     }
+    #endregion
+    #region Copy Class Diagram
+    private void RecursiveCopyClassTo(Item newOwnerItem, Item itemToCopy) {
+
+      if (_types.ClassTypes.Contains(itemToCopy.ItemTypeId)) { 
+        Item newItem = itemToCopy.AsClone();
+        newItem.Id = _items.GetNextId();
+        copyNodeLookups[itemToCopy.Id] = newItem.Id;
+        newItem.OwnerId = newOwnerItem.Id;
+        _items[newItem.Id] = newItem;
+        _itemFileTable.Insert(newItem, false);
+        newOwnerItem.Nodes.Add(newItem);
+        foreach (Item child in itemToCopy.Nodes) {
+          if (child.ItemTypeId != _types.CdRelationship.Id) {
+            RecursiveCopyClassTo(newItem, child);
+          } 
+        }
+      }
+    }
+
+    private void RecursiveCopyRelationship(Item newOwnerItem, Item itemToCopy) {
+      if (itemToCopy.ItemTypeId == _types.CdRelationship.Id) {
+        Item newItem = itemToCopy.AsClone();
+        newItem.Id = _items.GetNextId();
+        newItem.OwnerId = newOwnerItem.Id;
+        if (copyNodeLookups.ContainsKey(itemToCopy.OrientationId)) {
+          newItem.OrientationId = copyNodeLookups[itemToCopy.OrientationId];
+        } else {
+          newItem.OrientationId = itemToCopy.OrientationId;
+        }        
+        _items[newItem.Id] = newItem;
+        _itemFileTable.Insert(newItem, false);
+        newOwnerItem.Nodes.Add(newItem);
+      }
+      foreach (Item child in itemToCopy.Nodes) {
+        RecursiveCopyRelationship(newOwnerItem, child);        
+      }
+    }
+
+    private void RecursiveCopyNameSpaceItemTo(Item newOwnerItem, Item itemToCopy) {
+      if (_types.ClassTypes.Contains(itemToCopy.ItemTypeId)) { 
+        Item newItem = itemToCopy.AsClone();
+        newItem.Id = _items.GetNextId();
+        newItem.OwnerId = newOwnerItem.Id;
+        _items[newItem.Id] = newItem;
+        _itemFileTable.Insert(newItem, false);
+        newOwnerItem.Nodes.Add(newItem);
+        foreach (Item child in itemToCopy.Nodes) {
+          if (child.ItemTypeId == _types.CdNamespace.Id) {
+            RecursiveCopyNameSpaceItemTo(newItem, child);
+          } else if (_types.ClassTypes.Contains(itemToCopy.ItemTypeId)) {
+            RecursiveCopyClassTo(newItem, child);
+          }           
+        }
+        RecursiveCopyRelationship(newItem, itemToCopy);
+      }
+    }
+    #endregion
+    private bool IsDescendant(Item potentialDescendant, Item potentialAncestor) {
+      Item current = potentialDescendant;
+      while (current != null) {
+        if (current == potentialAncestor) {
+          return true;
+        }
+        current = current.Parent as Item;
+      }
+      return false;
+    }
 
 
     private ConcurrentDictionary<int, int> copyNodeLookups = new();
     public void CopyItemTo(Item newOwnerItem, Item itemToCopy) {
+
       if (IsDescendant(newOwnerItem, itemToCopy)) {
         throw new InvalidOperationException("Cannot copy an item to one of its descendants.");
       }
@@ -300,20 +393,37 @@ namespace Algos.Core
       }
       if(newOwnerDiagram.ItemTypeId != itemToCopyDiagram.ItemTypeId) {
         throw new InvalidOperationException("Cannot copy an item to a diagram of a different type.");
-      }      
+      }
+      try { 
+      copyNodeLookups.Clear();
       if (newOwnerDiagram.ItemTypeId == _types.MindMapDiagram.Id) {
         RecursiveCopyItemTo(newOwnerItem, itemToCopy);
-      } else if (newOwnerDiagram.ItemTypeId == _types.FlowChartDiagram.Id) {
-        copyNodeLookups.Clear();
+      } else if (newOwnerDiagram.ItemTypeId == _types.FlowChartDiagram.Id) {        
         RecursiveCopyFlowchartNodeTo(newOwnerItem, itemToCopy);
         RecursiveCopyFlowchartSubgraph(newOwnerItem, itemToCopy);
         RecursiveCopyFlowchartLinks(newOwnerItem, itemToCopy);
+      } else if (newOwnerDiagram.ItemTypeId == _types.ClassDiagram.Id) {
+
+        if ((newOwnerItem.ItemTypeId == _types.ClassDiagram.Id )
+          && (itemToCopy.ItemTypeId == _types.CdNamespace.Id)) {
+          RecursiveCopyNameSpaceItemTo(newOwnerItem, itemToCopy);
+        } else if ((newOwnerItem.ItemTypeId == _types.ClassDiagram.Id || newOwnerItem.ItemTypeId == _types.CdNamespace.Id)
+          && (_types.ClassTypes.Contains(itemToCopy.ItemTypeId))){          
+          RecursiveCopyClassTo(newOwnerItem, itemToCopy);
+          RecursiveCopyRelationship(newOwnerItem, itemToCopy);
+        } else {
+          RecursiveCopyRelationship(newOwnerItem, itemToCopy);
+        }
       }
-      
+      } catch (Exception ex) {
+        _logMsg.LogMsg($"{DateTime.Now} Copy Error {ex.Message}");
+      }
       _itemFileTable.Save();
     }
 
     #endregion
+
+
 
   }
 }
