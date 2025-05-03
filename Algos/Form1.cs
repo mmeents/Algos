@@ -225,6 +225,7 @@ namespace Algos
             return;
           }
           this.Text = "Algos - " + _ModelFileName;
+          label1.Text = "File opened:";
           btnOpen.Text = "Close";
           lbFocusedItem.Text = "";
           btnOpen.ImageIndex = 1;
@@ -235,7 +236,8 @@ namespace Algos
           if (!comboBox1.Visible) comboBox1.Visible = true;
           btnOpen.Text = "Open";
           _ModelFileName = "";
-          lbFocusedItem.Text = "File To Open";
+          label1.Text = "File to open";
+          lbFocusedItem.Text = "Use dropdown for history of open files, browse to pick.";
           treeView1.Nodes.Clear();
           _inEditItem = null;
           ResetPropertyEditors();
@@ -275,7 +277,10 @@ namespace Algos
 
     #region Treeview Context Menus 
     private void contextMenuStrip1_Opening(object sender, System.ComponentModel.CancelEventArgs e) {
-      if (_inEditItem == null) {
+      if (_inEditItem == null) {        
+        newMindMapDialogToolStripMenuItem.Visible = false;
+        newFlowchartDiagramMenuItem.Visible = false;
+        newClassDiagramMenuItem.Visible = false;
         addFlowchartNodeMenuItem.Visible = false;
         addFlowchartSubGraphToolStripMenuItem.Visible = false;
         addFlowchartLinkMenuItem.Visible = false;
@@ -289,6 +294,10 @@ namespace Algos
         addMethodParamToolStripMenuItem.Visible = false;
         addClassRelationshipMenuItem.Visible = false;
       } else {
+        newMindMapDialogToolStripMenuItem.Visible = true;
+        newFlowchartDiagramMenuItem.Visible = true;
+        newClassDiagramMenuItem.Visible = true;
+
         var diagramNode = _itemService.GetDiagramNode(_inEditItem);
         if (diagramNode.ItemTypeId == _types.MindMapDiagram.Id) {
           addFlowchartNodeMenuItem.Visible = false;
@@ -605,6 +614,7 @@ namespace Algos
           _inEditItem.Name = e.Label;
           ResetPropertyEditors();
           InEdit = true;
+          btnSave_Click(sender,  e);
         }
       } catch (Exception ex) {
         LogMsg(ex.Message);
