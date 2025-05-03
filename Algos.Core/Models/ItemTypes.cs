@@ -209,13 +209,13 @@ namespace Algos.Core.Models
 
       FlowChartOrientation = AddRootType("FlowChart Orientation", "Flow chart orientation types");
         var flowChartOrientationTopToBottom = AddVisibleChildType(FlowChartOrientation, "TopToBottom", "Flow chart orientation TopToBottom");
-        flowChartOrientationTopToBottom.FlowChartOrientation = FoggyBalrog.MermaidDotNet.Flowchart.Model.FlowchartOrientation.TopToBottom;
-        var flowChartOrientationBottomToTop = AddVisibleChildType(FlowChartOrientation, "BottomToTop", "Flow chart orientation BottomToTop");
-        flowChartOrientationBottomToTop.FlowChartOrientation = FoggyBalrog.MermaidDotNet.Flowchart.Model.FlowchartOrientation.BottomToTop;
-        var flowChartOrientationLeftToRight = AddVisibleChildType(FlowChartOrientation, "LeftToRight", "Flow chart orientation LeftToRight");
-        flowChartOrientationLeftToRight.FlowChartOrientation = FoggyBalrog.MermaidDotNet.Flowchart.Model.FlowchartOrientation.LeftToRight;
-        var flowChartOrientationRightToLeft = AddVisibleChildType(FlowChartOrientation, "RightToLeft", "Flow chart orientation RightToLeft");
-        flowChartOrientationRightToLeft.FlowChartOrientation = FoggyBalrog.MermaidDotNet.Flowchart.Model.FlowchartOrientation.RightToLeft;
+        flowChartOrientationTopToBottom.FlowChartOrientation = FoggyBalrog.MermaidDotNet.Flowchart.Model.FlowchartOrientation.LeftToRight;
+      // var flowChartOrientationBottomToTop = AddVisibleChildType(FlowChartOrientation, "BottomToTop", "Flow chart orientation BottomToTop");
+      // flowChartOrientationBottomToTop.FlowChartOrientation = FoggyBalrog.MermaidDotNet.Flowchart.Model.FlowchartOrientation.BottomToTop;
+      var flowChartOrientationLeftToRight = AddVisibleChildType(FlowChartOrientation, "LeftToRight", "Flow chart orientation LeftToRight");
+        flowChartOrientationLeftToRight.FlowChartOrientation = FoggyBalrog.MermaidDotNet.Flowchart.Model.FlowchartOrientation.TopToBottom; 
+       // var flowChartOrientationRightToLeft = AddVisibleChildType(FlowChartOrientation, "RightToLeft", "Flow chart orientation RightToLeft");
+       // flowChartOrientationRightToLeft.FlowChartOrientation = FoggyBalrog.MermaidDotNet.Flowchart.Model.FlowchartOrientation.RightToLeft;
 
       FlowChartLinkEnding = AddRootType("FlowChart LinkEnding", "Flow chart Link Ending Types");
         var flowChartLinkEndingArrow = AddVisibleChildType(FlowChartLinkEnding, "Arrow", "Flow chart Link Ending Arrow");
