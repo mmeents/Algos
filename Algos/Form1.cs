@@ -278,9 +278,9 @@ namespace Algos
     #region Treeview Context Menus 
     private void contextMenuStrip1_Opening(object sender, System.ComponentModel.CancelEventArgs e) {
       if (_inEditItem == null) {        
-        newMindMapDialogToolStripMenuItem.Visible = false;
-        newFlowchartDiagramMenuItem.Visible = false;
-        newClassDiagramMenuItem.Visible = false;
+        newMindMapDialogToolStripMenuItem.Visible = true;
+        newFlowchartDiagramMenuItem.Visible = true;
+        newClassDiagramMenuItem.Visible = true;
         addFlowchartNodeMenuItem.Visible = false;
         addFlowchartSubGraphToolStripMenuItem.Visible = false;
         addFlowchartLinkMenuItem.Visible = false;
@@ -665,6 +665,7 @@ namespace Algos
                 if (!targetNode.IsExpanded) targetNode.Expand();
                 if (targetNode.ItemTypeId == _types.MindMapDiagram.Id
                   || targetNode.ItemTypeId == _types.MindMapNodes.Id
+                  || targetNode.ItemTypeId == _types.MindMapShapes.Id
                 ) {
                   e.Effect = DragDropEffects.Move;
                 } else if (targetNode.ItemTypeId == _types.FlowChartDiagram.Id
@@ -1053,7 +1054,8 @@ namespace Algos
     private void cbShape_SelectedIndexChanged(object sender, EventArgs e) {
       if (!_InReset && _inEditItem != null) {
         var diagramNode = _itemService.GetDiagramNode(_inEditItem);
-        if (diagramNode.ItemTypeId == _types.MindMapDiagram.Id || diagramNode.ItemTypeId == _types.MindMapNodes.Id) {
+        if (diagramNode.ItemTypeId == _types.MindMapDiagram.Id 
+          || diagramNode.ItemTypeId == _types.MindMapNodes.Id ) {
           if (cbShape.SelectedValue != null && _inEditItem.ShapeId != cbShape.SelectedValue.AsInt32()) {
             InEdit = true;
           }
@@ -1238,8 +1240,8 @@ namespace Algos
       sb.AppendLine($"<title>Algos Display</title>");
       sb.AppendLine("<script type=\"module\">");
       sb.AppendLine("  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';");
-      sb.AppendLine("  mermaid.initialize({ startOnLoad: true, securityLevel: 'loose', theme: 'base' });");
-      sb.AppendLine("  document.addEventListener(\"DOMContentLoaded\", () => { mermaid.init(undefined, document.querySelectorAll(\".mermaid\")); });");
+      sb.AppendLine("  mermaid.initialize({ startOnLoad: true, securityLevel: 'loose', theme: 'default'});");
+    //  sb.AppendLine("  document.addEventListener(\"DOMContentLoaded\", () => { mermaid.init(undefined, document.querySelectorAll(\".mermaid\")); });");
       sb.AppendLine("</script>");
       sb.AppendLine("<script src=\"https://cdn.jsdelivr.net/npm/@panzoom/panzoom/dist/panzoom.min.js\"></script>\r\n");
       sb.AppendLine("<style>");
@@ -1251,6 +1253,9 @@ namespace Algos
       sb.AppendLine("    display: flex; ");              // Enable flex layout
       sb.AppendLine("    flex-direction: column; ");   // Stack elements vertically
       sb.AppendLine("    height: 100vh; ");            // Full viewport height
+      sb.AppendLine("    background-color: #ffffff !important; "); // Force white background
+      sb.AppendLine("    color: #333333 !important; ");            // Force dark text
+      sb.AppendLine("    color-scheme: light !important; ");       // Tells WebView2 this is a light page
       sb.AppendLine("  }");
       sb.AppendLine("  .mermaid-container { ");
       sb.AppendLine("    display: flex; ");
